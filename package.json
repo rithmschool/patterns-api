@@ -1,0 +1,40 @@
+{
+  "name": "patterns-api",
+  "version": "1.0.0",
+  "description": "Node backend for Patterns App",
+  "main": "app.js",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.3",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.1",
+    "method-override": "^2.3.9",
+    "mongoose": "^4.10.7",
+    "mongoose-findorcreate": "^2.0.0",
+    "passport": "^0.3.2",
+    "passport-google-oauth": "^1.0.0",
+    "qs": "^6.4.0"
+  },
+  "devDependencies": {
+    "locus": "^2.0.1",
+    "morgan": "^1.8.2",
+    "nodemon": "^1.11.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/nodemon/bin/nodemon.js app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rithmschool/patterns-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rithmschool/patterns-api/issues"
+  },
+  "homepage": "https://github.com/rithmschool/patterns-api#readme"
+}
