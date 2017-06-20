@@ -34,8 +34,6 @@ passport.use(new GoogleStrategy({
     return done(null);
   }
 ));
- 
-app.options('*', cors());
 
 app.get('/auth/google',
   passport.authenticate('google', {
@@ -46,7 +44,6 @@ app.get('/auth/google',
     ]
   })
 );
-
 
 app.post('/auth/google/callback',
   function(request, response) {
