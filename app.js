@@ -68,14 +68,16 @@ app.post('/auth/google/callback',
       db.User.findOrCreate({ 
         googleId: res.data.id, 
         firstName: res.data.given_name, 
-        lastName: res.data.family_name 
+        lastName: res.data.family_name,
+        email:res.data.email 
       }, 
       function (err, user) {
         if (err) { return done(err); }
         const payload = {
           googleId: user.googleId,
           firstName: user.firstName,
-          lastName: user.lastName
+          lastName: user.lastName,
+          email: user.email
         }
         const token = jwt.sign(payload, process.env.SECRET_KEY);
         response.status(200).send(token);
