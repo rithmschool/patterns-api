@@ -50,9 +50,8 @@ router.post('/google/callback',
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email
-        }
+        };
         const token = jwt.sign(payload, process.env.SECRET_KEY);
-        eval(require("locus"))
         response.status(200).send(token);
       });
     })
