@@ -4,8 +4,7 @@ var Type = require('../../models/type');
  
 describe('type model', function() {
   it('should be invalid if name is empty', function(done) {
-    var u = new Type();
-
+    var u = new Type(); 
     u.validate(function(err) {
       expect(err.errors.name).to.exist;
       done();

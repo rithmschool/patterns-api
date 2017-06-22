@@ -8,6 +8,7 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var cors = require("cors");
 var authRoutes = require('./routes/auth');
 var assetRoutes = require('./routes/assets');
+var loginRequired = require('./routes/helpers');
 
 if (process.env.NODE_ENV !== 'production') {
   require("dotenv").config();
@@ -34,7 +35,7 @@ passport.use(new GoogleStrategy({
 ));
 
 app.use('/auth', authRoutes);
-app.use('/types/:id/assets', assetRoutes);
+app.use('/types/:id/assets', loginRequired, assetRoutes);
 
 app.listen(3001, function() {
   console.log("Server is listening on port 3001");
