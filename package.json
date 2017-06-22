@@ -23,7 +23,8 @@
     "mocha": "^3.4.2",
     "morgan": "^1.8.2",
     "nodemon": "^1.11.0",
-    "sinon": "^2.3.5"
+    "sinon": "^2.3.5",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "test": "mocha --recursive",
