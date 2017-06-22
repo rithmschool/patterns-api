@@ -4,17 +4,17 @@ var Type = require('../../models/type');
  
 describe('type model', function() {
   it('should be invalid if name is empty', function(done) {
-    var u = new Type(); 
-    u.validate(function(err) {
+    var t = new Type();
+    t.validate(function(err) {
       expect(err.errors.name).to.exist;
       done();
     });
   });
 
   it('should be invalid if isAgent is empty', function(done) {
-    var u = new Type();
+    var t = new Type();
 
-    u.validate(function(err) {
+    t.validate(function(err) {
       expect(err.errors.isAgent).to.exist;
       done();
     });

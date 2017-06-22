@@ -47,11 +47,11 @@ after(function(done) {
 describe('GET /types/:id/assets', function() {
   it('responds with an array of assets if token is valid', function(done) {
     const testingData = {
-      googleId: "104710937652817506441",
+      googleId: "623987ygvjhsbd2923uhcsdhb2390usdhjb2309ucsdhb2309ufyubshdf9u023hcwhsdbce09u2dbd3049hcsjd",
       firstName:"Testing",
       lastName:"Patterns-Api",
       email:"testing.patterns.api@gmail.com",
-    }
+    };
     const token = login(testingData);
     request(app)
       .get(`/types/${type.id}/assets`)
