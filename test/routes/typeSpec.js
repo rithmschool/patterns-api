@@ -4,9 +4,11 @@ var db = require("../../models");
 var app = require("../../app");
 const login = require("../helpers");
 const request = require('supertest');
+const expect = require('chai').expect;
 
-beforeEach(function(done) {
-  let type = null;
+let type = null;
+
+before(function(done) {
   db.Type.create({ 
     isAgent: false, 
     name:'Brand'
@@ -29,18 +31,41 @@ beforeEach(function(done) {
   })
   .catch(function(error){
     console.log(error);
+  });
+});
+
+after(function(done) {
+  db.Type.remove({})
+  .then(function() {
+    return db.Asset.remove({})
   })
-})
+  .then(function() {
+    done();
+  });
+});
 
 describe('GET /types/:id/assets', function() {
-  it('responds with json if token is valid', function(done) {
-    const token = login()
-    console.log(token)
+  it('responds with an array of assets if token is valid', function(done) {
+    const testingData = {
+      googleId: "104710937652817506441",
+      firstName:"Testing",
+      lastName:"Patterns-Api",
+      email:"testing.patterns.api@gmail.com",
+    }
+    const token = login(testingData);
     request(app)
-      .get('/types/:id/assets')
-      .set('Authorization', 'Bearer:' + token)
-      .expect(200, /* TODO */ done);
-  });
+      .get(`/types/${type.id}/assets`)
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res) {
+        expect(res.body.isAgent).to.be.false;
+        expect(res.body.name).to.equal('Brand');
+        expect(res.body.assets.length).to.equal(1);
+        expect(res.body.assets[0].name).to.equal('Google');
+        expect(res.body.assets[0].description).to.equal('We know everything about you');
+      })
+      .end(done);
+  }); 
 
   it('should be invalid if token is invalid', function(done) {
     request(app)
@@ -57,10 +82,4 @@ describe('GET /types/:id/assets', function() {
         message: "You must be logged in to continue."
       }, done);
   });
-
-
 });
-
-//if no token, send back error (400)
-//if valid token, send back the data with 200
-// if there's a token, but it's invalid , send error

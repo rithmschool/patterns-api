@@ -1,6 +1,6 @@
-var mongoose = require("mongoose");
-var findOrCreate = require('mongoose-findorcreate');
-var typeSchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const findOrCreate = require('mongoose-findorcreate');
+const typeSchema = new mongoose.Schema({
   isAgent: {
     type: Boolean,
     required: true
@@ -16,6 +16,5 @@ var typeSchema = new mongoose.Schema({
 });
 
 typeSchema.plugin(findOrCreate);
-var Type = mongoose.model('Type', typeSchema);
-
+const Type = mongoose.model('Type', typeSchema);
 module.exports = Type;

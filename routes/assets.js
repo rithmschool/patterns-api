@@ -1,14 +1,15 @@
 var express = require("express");
-var router = express.Router();
+var router = express.Router({mergeParams: true});
+var db = require("../models");
 
-router.get('/', function(request, response) {
-  if (req.body ) {
-    response.status(200).send("")
-  } else if (req){
-    response.status(400).send("We didn't make it ☹️");
-  } else {
-    response.status(x).send(y)
-  }
+router.get('/', function(req, res) {
+  db.Type.findById(req.params.id).populate('assets')
+  .then(function(type){
+    res.send(type);
+  })
+  .catch(function(err){
+    res.send(err);
+  })
 })
 
 module.exports = router;

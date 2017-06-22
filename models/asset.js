@@ -1,6 +1,6 @@
-var mongoose = require("mongoose");
-var findOrCreate = require('mongoose-findorcreate');
-var assetSchema = new mongoose.Schema({
+const mongoose = require("mongoose");
+const findOrCreate = require('mongoose-findorcreate');
+const assetSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
@@ -23,6 +23,6 @@ var assetSchema = new mongoose.Schema({
 
 assetSchema.plugin(findOrCreate);
 
-var Asset = mongoose.model('Asset', assetSchema);
+const Asset = mongoose.model('Asset', assetSchema);
 
 module.exports = Asset;
