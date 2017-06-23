@@ -7,6 +7,7 @@ var passport = require("passport");
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var cors = require("cors");
 var authRoutes = require('./routes/auth');
+var typesRoutes = require('./routes/types');
 var assetRoutes = require('./routes/assets');
 var loginRequired = require('./routes/helpers');
 
@@ -35,6 +36,7 @@ passport.use(new GoogleStrategy({
 ));
 
 app.use('/auth', authRoutes);
+app.use('/types', loginRequired, typesRoutes);
 app.use('/types/:id/assets', loginRequired, assetRoutes);
 
 app.listen(3001, function() {
