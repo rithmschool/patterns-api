@@ -8,8 +8,8 @@ router.get('/', function(req, res) {
     res.send(type);
   })
   .catch(function(err){
-    res.send(err);
-  })
+    res.status(500).send(err);
+  });
 });
 
 module.exports = router;

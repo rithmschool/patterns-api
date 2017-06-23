@@ -4,9 +4,17 @@ var db = require("../../models");
 var app = require("../../app");
 const login = require("../helpers");
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
 
 let type = null;
+
+const testingData = {
+  googleId: "623987ygvjhsbd2923uhcsdhb2390usdhjb",
+  firstName:"Testing",
+  lastName:"Patterns-Api",
+  email:"testing.patterns.api@gmail.com",
+};
 
 before(function(done) {
   db.Type.create({ 
@@ -46,12 +54,6 @@ after(function(done) {
 
 describe('GET /types/:id/assets', function() {
   it('responds with an array of assets if token is valid', function(done) {
-    const testingData = {
-      googleId: "623987ygvjhsbd2923uhcsdhb2390usdhjb2309ucsdhb2309ufyubshdf9u023hcwhsdbce09u2dbd3049hcsjd",
-      firstName:"Testing",
-      lastName:"Patterns-Api",
-      email:"testing.patterns.api@gmail.com",
-    };
     const token = login(testingData);
     request(app)
       .get(`/types/${type.id}/assets`)
@@ -69,15 +71,16 @@ describe('GET /types/:id/assets', function() {
 
   it('should be invalid if token is invalid', function(done) {
     request(app)
-      .get('/types/:id/assets')
+      .get(`/types/${type.id}/assets`)
+      .set('authorization', 'Bearer: ' + jwt.sign(testingData, 'wrong key'))
       .expect(401, {
-        message: "You must be logged in to continue."
+        message: "Invalid user."
       }, done);
   });
 
   it('it should be invalid if there is no token', function(done) {
     request(app)
-      .get('/types/:id/assets')
+      .get(`/types/${type.id}/assets`)
       .expect(401, {
         message: "You must be logged in to continue."
       }, done);
