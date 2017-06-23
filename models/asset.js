@@ -22,7 +22,5 @@ const assetSchema = new mongoose.Schema({
 });
 
 assetSchema.plugin(findOrCreate);
-
 const Asset = mongoose.model('Asset', assetSchema);
-
 module.exports = Asset;
