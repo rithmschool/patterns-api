@@ -5,7 +5,8 @@ const assetSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  description: String,
+  url: String,
+  logo: String,
   assets: [this],
   createdAt: {
     type: Date, 
