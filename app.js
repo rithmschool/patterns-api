@@ -6,6 +6,7 @@ var bodyParser = require("body-parser");
 var passport = require("passport");
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var cors = require("cors");
+
 var authRoutes = require('./routes/auth');
 var typesRoutes = require('./routes/types');
 var assetRoutes = require('./routes/assets');

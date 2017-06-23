@@ -5,7 +5,6 @@ var app = require("../../app");
 const login = require("../helpers").login;
 const testingData = require("../helpers").testingData;
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
 
 describe('GET /types', function() {
