@@ -77,6 +77,6 @@ describe('GET /types/:id/assets', function() {
     })
     .then(function() {
       done();
+    });
   });
-});
 });

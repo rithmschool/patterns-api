@@ -4,12 +4,12 @@ var db = require("../models");
 
 router.get('/', function(req, res) {
   db.Type.findById(req.params.id).populate('assets')
-    .then(function(type){
-      res.send(type);
-    })
-    .catch(function(err){
-      res.status(500).send(err);
-    });
+	.then(function(type){
+	  res.send(type);
+	})
+	.catch(function(err){
+	  res.status(500).send(err);
+	});
 });
 
 module.exports = router;
