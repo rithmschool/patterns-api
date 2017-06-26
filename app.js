@@ -15,10 +15,10 @@ var loginRequired = require('./routes/helpers');
 
 if (process.env.NODE_ENV !== 'production') {
   require("dotenv").config();
+  app.use(morgan("tiny"));
 }
 
 app.use(express.static(__dirname + "/public"));
-app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride("_method"));
