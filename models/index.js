@@ -6,3 +6,5 @@ mongoose.Promise = Promise;
 module.exports.User = require("./user");
 module.exports.Type = require("./type");
 module.exports.Asset = require("./asset");
+module.exports.Activity = require("./activity");
+module.exports.Stage = require("./stage");

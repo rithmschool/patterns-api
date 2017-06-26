@@ -10,6 +10,7 @@ var cors = require("cors");
 var authRoutes = require('./routes/auth');
 var typesRoutes = require('./routes/types');
 var assetRoutes = require('./routes/assets');
+var activitiesRoutes = require('./routes/activities');
 var loginRequired = require('./routes/helpers');
 
 if (process.env.NODE_ENV !== 'production') {
@@ -39,6 +40,7 @@ passport.use(new GoogleStrategy({
 app.use('/auth', authRoutes);
 app.use('/types', loginRequired, typesRoutes);
 app.use('/assets/:a_id/childassets', loginRequired, assetRoutes);
+app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
 
 app.listen(3001, function() {
   console.log("Server is listening on port 3001");

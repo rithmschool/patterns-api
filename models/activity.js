@@ -16,7 +16,11 @@ const activitySchema = new mongoose.Schema({
   stages: [{
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Stage'
-  }]
+  }],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 });
 
 activitySchema.plugin(findOrCreate);
