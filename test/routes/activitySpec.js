@@ -8,7 +8,6 @@ const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
 
-
 describe('GET /users/:u_id/activities/', function() {
   let activity = null;
   let activity2 = null;
@@ -27,7 +26,7 @@ describe('GET /users/:u_id/activities/', function() {
         return activity.save();
       })
       .then(function(newActivity){
-        user.activities.push(newActivity._id);
+        user.activities.push(newActivity.id);
         activity = newActivity;
         return user.save();
       })
@@ -39,7 +38,7 @@ describe('GET /users/:u_id/activities/', function() {
         return stage.save()
       })
       .then(function(stage) {
-        activity.stages.push(stage._id);
+        activity.stages.push(stage.id);
         return activity.save()
       })
       .then(function(activity){
@@ -50,7 +49,7 @@ describe('GET /users/:u_id/activities/', function() {
         return activity2.save();
       })
       .then(function(newActivity2){
-        user.activities.push(newActivity2._id);
+        user.activities.push(newActivity2.id);
         activity2 = newActivity2;
         return user.save();
       })
@@ -62,13 +61,15 @@ describe('GET /users/:u_id/activities/', function() {
         return stage2.save()
       })
       .then(function(stage2) {
-        activity2.stages.push(stage2._id);
+        activity2.stages.push(stage2.id);
         return activity2.save()
       })
-      .then(() => { 
-        done()
+      .then(function(){ 
+        done();
       })
-      .catch((err) => done(err));
+      .catch(function(err){
+        console.log(err);
+      })
   });
 
   it('responds with an activity if token is valid', function(done) { 
