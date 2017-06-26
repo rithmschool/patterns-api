@@ -3,12 +3,11 @@ var router = express.Router({mergeParams: true});
 var db = require("../models");
 
 router.get('/', function(req, res) {
-  console.log("REQ PARAMS", req.params.u_id)
   db.User.findById(req.params.u_id).populate('activities')
     .then(function(user){
       db.Activity.find(user.activities).populate('stages')
-      .then(function(activity){
-      res.send(activity);
+      .then(function(activities){
+        res.send(activities);
       })
     })
     .catch(function(err){

@@ -11,7 +11,9 @@ const expect = require('chai').expect;
 
 describe('GET /users/:u_id/activities/', function() {
   let activity = null;
+  let activity2 = null;
   let stage = null;
+  let stage2 = null;
   let user = null;
   before(function(done) {
     user = new db.User(testingData);
@@ -40,6 +42,29 @@ describe('GET /users/:u_id/activities/', function() {
         activity.stages.push(stage._id);
         return activity.save()
       })
+      .then(function(activity){
+        activity2 = new db.Activity({
+          name: 'Job search August 2017',
+          user: user.id
+        });
+        return activity2.save();
+      })
+      .then(function(newActivity2){
+        user.activities.push(newActivity2._id);
+        activity2 = newActivity2;
+        return user.save();
+      })
+      .then(function(user) {
+        stage2 = new db.Stage({
+          name: 'Follow-up',
+          activity: activity2.id
+        })
+        return stage2.save()
+      })
+      .then(function(stage2) {
+        activity2.stages.push(stage2._id);
+        return activity2.save()
+      })
       .then(() => { 
         done()
       })
@@ -54,8 +79,10 @@ describe('GET /users/:u_id/activities/', function() {
       .expect(200)
       .expect(function(res) {
         expect(res.body[0].name).to.equal('Job search June 2017');
+        expect(res.body[1].name).to.equal('Job search August 2017');
         expect(res.body[0].stages.length).to.equal(1);
         expect(res.body[0].stages[0].name).to.equal('Research');
+        expect(res.body[1].stages[0].name).to.equal('Follow-up');
       })
       .end(done);
   });
