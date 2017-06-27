@@ -1,13 +1,10 @@
 const mongoose = require("mongoose");
 const findOrCreate = require('mongoose-findorcreate');
-const assetSchema = new mongoose.Schema({
+const activitySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
   },
-  url: String,
-  logo: String,
-  assets: [this],
   createdAt: {
     type: Date, 
     default: Date.now
@@ -16,14 +13,16 @@ const assetSchema = new mongoose.Schema({
     type: Date, 
     default: Date.now
   },
-  typeId: {
+  stages: [{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Stage'
+  }],
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Type'
+    ref: 'User'
   }
 });
 
-assetSchema.plugin(findOrCreate);
-
-const Asset = mongoose.model('Asset', assetSchema);
-
-module.exports = Asset;
+activitySchema.plugin(findOrCreate);
+const Activity = mongoose.model('Activity', activitySchema);
+module.exports = Activity;

@@ -7,15 +7,17 @@ var passport = require("passport");
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var cors = require("cors");
 var authRoutes = require('./routes/auth');
+var typesRoutes = require('./routes/types');
 var assetRoutes = require('./routes/assets');
+var activitiesRoutes = require('./routes/activities');
 var loginRequired = require('./routes/helpers');
 
 if (process.env.NODE_ENV !== 'production') {
   require("dotenv").config();
+  app.use(morgan("tiny"));
 }
 
 app.use(express.static(__dirname + "/public"));
-app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride("_method"));
@@ -35,7 +37,10 @@ passport.use(new GoogleStrategy({
 ));
 
 app.use('/auth', authRoutes);
-app.use('/types/:id/assets', loginRequired, assetRoutes);
+app.use('/types', loginRequired, typesRoutes);
+app.use('/assets/:a_id/childassets', loginRequired, assetRoutes);
+app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
+
 
 app.listen(3001, function() {
   console.log("Server is listening on port 3001");

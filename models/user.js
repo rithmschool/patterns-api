@@ -10,7 +10,11 @@ var userSchema = new mongoose.Schema({
     required: true
   }, 
   firstName: String,
-  lastName: String
+  lastName: String,
+  activities: [{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Activity'
+  }]
 });
 
 userSchema.plugin(findOrCreate);
