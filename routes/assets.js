@@ -39,12 +39,9 @@ router.post('/', function(req, res) {
 router.delete('/:c_id', function(req, res) {
   db.Asset.findById(req.params.c_id)
   .then(function(target){
-    // target looks good here
-    // db.Asset.remove(target); // causing error
     target.remove()
   })
   .then(function() {
-    // console.log("STILL HERE?",db.Asset.find(target));
     res.send(200);
   })
   .catch(function(err){

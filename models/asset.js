@@ -26,29 +26,24 @@ const assetSchema = new mongoose.Schema({
   }
 });
 
-
 assetSchema.pre('remove', function(next) {
-  // getting here now
-  // console.log("INSIDE PREHOOK", this)
   let target = this;
   let parent = null;
-    // deletes all children of target asset (not necessarily all descendants)
   db.Asset.remove({parent: target.id})
   .then(function(){
-    console.log("INSIDE .THEN");
-    parent = db.Asset.findById(target.parent);
-    return parent.save();
+    return db.Asset.findById(target.parent);
   })
-  .then(function(){
-    // deletes it from its parent's assets array
-    console.log("PARENT",parent);
+  .then(function(foundParent){
+    parent = foundParent;
     let foundIdx = parent.assets.indexOf(target.id);
     parent.assets.splice(foundIdx, 1);
     return parent.save();
   })
-  .then(function(parent){
+  .then(function(){
     next();
-  }, function(err){
+  })
+  .catch(function(err){
+    console.log("ERR", err)
     next(err);
   });
 });
