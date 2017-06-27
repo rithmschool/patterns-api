@@ -39,15 +39,14 @@ router.post('/', function(req, res) {
 router.delete('/:c_id', function(req, res) {
   db.Asset.findById(req.params.c_id)
   .then(function(target){
-    target.remove()
+    return target.remove();
   })
   .then(function() {
     res.send(200);
   })
   .catch(function(err){
-    console.log("ERROR!!")
     res.status(500).send(err);
   });
-})
+});
 
 module.exports = router;

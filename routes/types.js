@@ -22,20 +22,8 @@ router.post('/', function(req, res) {
     });
 });
 
-// Do we need to also remove all Assets of this given Type?
-router.delete('/:t_id', function(req, res) {
-  let foundType = db.Type.findById(req.params.t_id)
-  .then(function(foundType) {
-    db.Type.remove(foundType);
-    res.send(200);
-  })
-  .catch(function(err){
-    res.status(500).send(err);
-  });
-})
-
-router.get('/:id/assets', function(req, res) {
-  db.Type.findById(req.params.id).populate('assets')
+router.get('/:t_id/assets', function(req, res) {
+  db.Type.findById(req.params.t_id).populate('assets')
   .then(function(type){
     res.send(type);
   })
@@ -44,11 +32,11 @@ router.get('/:id/assets', function(req, res) {
   });
 });
 
-router.post('/:id/assets', function(req, res) {
+router.post('/:t_id/assets', function(req, res) {
   let newAsset = new db.Asset(req.body);
-  let type;
-  newAsset.typeId = req.params.id;
-  db.Type.findById(req.params.id)
+  let type = null;
+  newAsset.typeId = req.params.t_id;
+  db.Type.findById(req.params.t_id)
     .then(function(foundType) {
       type = foundType;
       return newAsset.save();

@@ -34,16 +34,17 @@ assetSchema.pre('remove', function(next) {
     return db.Asset.findById(target.parent);
   })
   .then(function(foundParent){
-    parent = foundParent;
-    let foundIdx = parent.assets.indexOf(target.id);
-    parent.assets.splice(foundIdx, 1);
-    return parent.save();
+    if(foundParent){
+      parent = foundParent;
+      let foundIdx = parent.assets.indexOf(target.id);
+      parent.assets.splice(foundIdx, 1);
+      return parent.save();
+    }
   })
   .then(function(){
     next();
   })
   .catch(function(err){
-    console.log("ERR", err)
     next(err);
   });
 });

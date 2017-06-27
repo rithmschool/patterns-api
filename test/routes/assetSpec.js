@@ -89,7 +89,7 @@ describe('POST /assets/:a_id/childassets', function() {
       .expect(function(res, req) {
         expect(res.body.name).to.equal('Brand');
         expect(res.body.id).to.not.be.null;
-        expect(res.body.parent._id).to.equal(parent.id);
+        expect(res.body.parent.id).to.equal(parent.id);
       })
       .end(done);
     });
@@ -162,23 +162,16 @@ describe('DELETE /assets/:a_id/childassets/:c_id', function() {
       .expect(200)
       .expect(function(res, req) {
         expect(res.body).to.deep.equal({});
-
-        db.Asset.findById(parent.id)
-        .then(function(foundParent) {
-          expect(foundParent.assets.indexOf(child.id)).to.equal(-1);
-        })
-        .then(function(){
-          db.Asset.findOne(grandchild);
-        })
-        .then(function(foundGrandchild) {
-          expect(foundGrandchild).to.equal(null);
-        })
-        .then(function() {
-          done();
-        })
-        .catch(function(error){
-          console.log(error);
-        });
+        return db.Asset.findById(parent.id)
+      })
+      .then(function(foundParent) {
+        expect(foundParent.assets.indexOf(child.id)).to.equal(-1);
+      })
+      .then(function(){
+        db.Asset.findOne(grandchild);
+      })
+      .then(function(foundGrandchild) {
+        expect(foundGrandchild).to.equal(null);
       })
       .then(function() {
         done();

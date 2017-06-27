@@ -86,50 +86,6 @@ describe('POST /types', function() {
   });
 });
 
-describe('DELETE /types/:t_id', function() {
-  let type = null;
-  before(function(done) {
-    db.Type.create({
-      isAgent: true,
-      name: 'Employees'
-    })
-    .then(function(newType) {
-      type = newType;
-      done();
-    })
-    .catch(function(error) {
-      console.log(error);
-    });
-  });
-
-  it('deletes a type if token is valid', function(done) { 
-    const token = login(testingData);
-    request(app)
-      .delete(`/types/${type.id}`)
-      .set('authorization', 'Bearer: ' + token)
-      .expect(200)
-      .expect(function(res) {
-        expect(res.body).to.deep.equal({});
-      })
-      .end(done);
-  });
-
-  it('it should be invalid if there is no token', function(done) {
-    request(app)
-      .delete(`/types/${type.id}`)
-      .expect(401, {
-        message: "You must be logged in to continue."
-      }, done);
-  });
-
-  after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      done();
-    });
-  });
-});
-
 describe('GET /types/:id/assets', function() {
   let type = null;
   before(function(done) {
