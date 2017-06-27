@@ -5,6 +5,7 @@ var bodyParser = require("body-parser");
 var passport = require("passport");
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var cors = require("cors");
+var PORT = process.env.PORT || 3001;
 
 var authRoutes = require('./routes/auth');
 var typesRoutes = require('./routes/types');
@@ -42,8 +43,8 @@ app.use('/types', loginRequired, typesRoutes);
 app.use('/assets/:a_id/childassets', loginRequired, assetRoutes);
 app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
 
-app.listen(3001, function() {
-  console.log("Server is listening on port 3001");
+app.listen(PORT, function() {
+  console.log("Server is listening");
 });
 
 module.exports = app;
