@@ -6,6 +6,7 @@ var db = require("../models");
 var cors = require("cors");
 var axios = require('axios');
 var qs = require("qs");
+var util = require('util');
 
 router.get('/google',
   passport.authenticate('google', {
@@ -56,7 +57,7 @@ router.post('/google/callback',
       });
     })
     .catch(function(error) {
-      response.status(500).send(error);
+      response.status(500).send(util.inspect(error));
     });
   }
 );
