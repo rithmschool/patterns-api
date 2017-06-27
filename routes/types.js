@@ -1,6 +1,6 @@
-var express = require("express");
-var router = express.Router();
-var db = require("../models");
+const express = require("express");
+const router = express.Router();
+const db = require("../models");
 
 router.get('/', function(req, res) {
   db.Type.find()
@@ -11,6 +11,28 @@ router.get('/', function(req, res) {
       res.status(500).send(err);
     });
 });
+
+router.post('/', function(req, res) {
+  db.Type.create(req.body)
+    .then(function(newType) {
+      res.send(newType);
+    })
+    .catch(function(err) {
+      res.status(500).send(err);
+    });
+});
+
+// Do we need to also remove all Assets of this given Type?
+router.delete('/:t_id', function(req, res) {
+  let foundType = db.Type.findById(req.params.t_id)
+  .then(function(foundType) {
+    db.Type.remove(foundType);
+    res.send(200);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+})
 
 router.get('/:id/assets', function(req, res) {
   db.Type.findById(req.params.id).populate('assets')
@@ -23,8 +45,8 @@ router.get('/:id/assets', function(req, res) {
 });
 
 router.post('/:id/assets', function(req, res) {
-  var newAsset = new db.Asset(req.body);
-  var type;
+  let newAsset = new db.Asset(req.body);
+  let type;
   newAsset.typeId = req.params.id;
   db.Type.findById(req.params.id)
     .then(function(foundType) {
