@@ -86,6 +86,77 @@ describe('POST /types', function() {
   });
 });
 
+describe('DELETE /types/:t_id', function() {
+  let type = null;
+  let asset = null;
+  before(function(done) {
+    db.Type.create({
+      isAgent: true,
+      name: 'Employees'
+    })
+    .then(function(newType) {
+      type = newType;
+      return db.Asset.create({
+        name: "Matt",
+        typeId: type.id
+      });
+    })
+    .then(function(newAsset) {
+      asset = newAsset;
+      type.assets.push(asset);
+      return type.save();
+    })
+    .then(function() {
+      done();
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+  });
+
+  it('deletes a type and all assets of that type if token is valid', function(done) { 
+    const token = login(testingData);
+    request(app)
+      .delete(`/types/${type.id}`)
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res) {
+        expect(res.body).to.deep.equal({});
+        db.Asset.find({typeId: type.id})
+        .then(function(foundAssets) {
+          expect(foundAssets.length).to.equal(0)
+        })
+        .then(function() {
+          done();
+        })
+        .catch(function(error){
+          console.log(error);
+        });
+      })
+      .then(function() {
+        done();
+      })
+      .catch(function(error){
+        console.log(error);
+      });
+  });
+
+  it('it should be invalid if there is no token', function(done) {
+    request(app)
+      .delete(`/types/${type.id}`)
+      .expect(401, {
+        message: "You must be logged in to continue."
+      }, done);
+  });
+
+  after(function(done) {
+    db.Type.remove({})
+    .then(function() {
+      done();
+    });
+  });
+});
+
 describe('GET /types/:id/assets', function() {
   let type = null;
   before(function(done) {
@@ -207,6 +278,85 @@ describe('POST /types/:id/assets', function() {
 
   after(function(done) {
     db.Type.remove({})
+    .then(function() {
+      done();
+    });
+  });
+});
+
+describe('DELETE /types/:t_id/assets/:a_id', function() {
+  let asset = null; // Microsoft
+  let type = null; // Corporation
+  before(function(done) {
+    db.Type.create({ 
+      isAgent: false, 
+      name: 'Corporation'
+    })
+    .then(function(newType){
+      type = newType;
+      return db.Asset.create({
+        name: 'Microsoft',
+        url: 'https://www.microsoft.com/en-us/',
+        logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
+        typeId: newType.id
+      });
+    })
+    .then(function(newAsset) {
+      asset = newAsset;
+      type.assets.push(asset._id);
+      return type.save()
+    })
+    .then(function() {
+      done();
+    })
+    .catch(function(error){
+      console.log(error);
+    });
+  })
+
+  it("deletes asset of a certain type and asset's descendants if token is valid", function(done) {
+    const token = login(testingData);
+    request(app)
+      .delete(`/types/${type.id}/assets/${asset.id}`)
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res, req) {
+        expect(res.body).to.deep.equal({});
+        db.Type.findById(type.id)
+        .then(function(foundType) {
+          expect(foundType.assets.indexOf(asset.id)).to.equal(-1);
+        })
+        .then(function(){
+          db.Asset.findOne(asset);
+        })
+        .then(function(foundAsset) {
+          expect(foundAsset).to.equal(null);
+        })
+        .then(function() {
+          done();
+        })
+        .catch(function(error){
+          console.log(error);
+        });
+      })
+      .then(function() {
+        done();
+      })
+      .catch(function(error){
+        console.log(error);
+      });
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .delete(`/types/${type.id}/assets/${asset.id}`)
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+  after(function(done) {
+    db.Asset.remove({})
     .then(function() {
       done();
     });

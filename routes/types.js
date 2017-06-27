@@ -22,6 +22,19 @@ router.post('/', function(req, res) {
     });
 });
 
+router.delete('/:t_id', function(req, res) {
+  db.Type.findById(req.params.t_id)
+  .then(function(foundType) {
+    foundType.remove();
+  })
+  .then(function(){
+    res.send(200);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+})
+
 router.get('/:t_id/assets', function(req, res) {
   db.Type.findById(req.params.t_id).populate('assets')
   .then(function(type){
@@ -51,6 +64,19 @@ router.post('/:t_id/assets', function(req, res) {
     .catch(function(err){
       res.status(500).send(err);
     });
+});
+
+router.delete('/:t_id/assets/:a_id', function(req, res) {
+  db.Asset.findById(req.params.a_id)
+  .then(function(foundAsset){
+    foundAsset.remove();
+  })
+  .then(function(){
+    res.send(200);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
 });
 
 module.exports = router;
