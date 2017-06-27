@@ -1,7 +1,6 @@
 var express = require("express");
 var app = express();
 var methodOverride = require("method-override");
-var morgan = require("morgan");
 var bodyParser = require("body-parser");
 var passport = require("passport");
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
@@ -13,6 +12,7 @@ var activitiesRoutes = require('./routes/activities');
 var loginRequired = require('./routes/helpers');
 
 if (process.env.NODE_ENV !== 'production') {
+  var morgan = require("morgan");
   require("dotenv").config();
   app.use(morgan("tiny"));
 }
