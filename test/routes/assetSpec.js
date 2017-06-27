@@ -89,7 +89,7 @@ describe('POST /assets/:a_id/childassets', function() {
       .expect(function(res, req) {
         expect(res.body.name).to.equal('Brand');
         expect(res.body.id).to.not.be.null;
-        expect(res.body.parent.id).to.equal(parent.id);
+        expect(res.body.parent._id).to.equal(parent.id);
       })
       .end(done);
     });
@@ -152,7 +152,7 @@ describe('DELETE /assets/:a_id/childassets/:c_id', function() {
     .catch(function(error){
       console.log(error);
     });
-  })
+  });
 
   it("deletes target, target from parent's assets array, and target's descendants if token is valid", function(done) {
     const token = login(testingData);
@@ -162,16 +162,22 @@ describe('DELETE /assets/:a_id/childassets/:c_id', function() {
       .expect(200)
       .expect(function(res, req) {
         expect(res.body).to.deep.equal({});
-        return db.Asset.findById(parent.id)
-      })
-      .then(function(foundParent) {
-        expect(foundParent.assets.indexOf(child.id)).to.equal(-1);
-      })
-      .then(function(){
-        db.Asset.findOne(grandchild);
-      })
-      .then(function(foundGrandchild) {
-        expect(foundGrandchild).to.equal(null);
+        db.Asset.findById(parent.id)
+        .then(function(foundParent) {
+          expect(foundParent.assets.indexOf(child.id)).to.equal(-1);
+        })
+        .then(function(){
+          db.Asset.findOne(grandchild);
+        })
+        .then(function(foundGrandchild) {
+          expect(foundGrandchild).to.equal(null);
+        })
+        .then(function() {
+          done();
+        })
+        .catch(function(error){
+          console.log(error);
+        });
       })
       .then(function() {
         done();

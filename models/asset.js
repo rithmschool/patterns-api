@@ -29,9 +29,9 @@ const assetSchema = new mongoose.Schema({
 assetSchema.pre('remove', function(next) {
   let target = this;
   let parent = null;
-  db.Asset.remove({parent: target.id})
+  this.constructor.remove({parent: target.id})
   .then(function(){
-    return db.Asset.findById(target.parent);
+    return this.constructor.findById(target.parent);
   })
   .then(function(foundParent){
     if(foundParent){

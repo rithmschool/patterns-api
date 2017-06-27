@@ -39,10 +39,10 @@ router.post('/', function(req, res) {
 router.delete('/:c_id', function(req, res) {
   db.Asset.findById(req.params.c_id)
   .then(function(target){
-    return target.remove();
+    target.remove();
   })
   .then(function() {
-    res.send(200);
+    res.status(200).send({});
   })
   .catch(function(err){
     res.status(500).send(err);
