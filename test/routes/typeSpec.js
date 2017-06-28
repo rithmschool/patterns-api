@@ -182,12 +182,7 @@ describe('DELETE /types/:t_id', function() {
           console.log(error);
         });
       })
-      .then(function() {
-        done();
-      })
-      .catch(function(error){
-        console.log(error);
-      });
+      .end(done);
   });
 
   it('it should be invalid if there is no token', function(done) {
@@ -200,6 +195,9 @@ describe('DELETE /types/:t_id', function() {
 
   after(function(done) {
     db.Type.remove({})
+    .then(function() {
+      return db.Asset.remove({})
+    })
     .then(function() {
       done();
     });
@@ -457,21 +455,16 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
           console.log(error);
         });
       })
-      .then(function() {
-        done();
-      })
-      .catch(function(error){
-        console.log(error);
-      });
-    });
+      .end(done);
+  });
 
-    it('it should be invalid if there is no token', function(done) {
-      request(app)
-        .delete(`/types/${type.id}/assets/${asset.id}`)
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
-    });
+  it('it should be invalid if there is no token', function(done) {
+    request(app)
+      .delete(`/types/${type.id}/assets/${asset.id}`)
+      .expect(401, {
+        message: "You must be logged in to continue."
+      }, done);
+  });
 
   after(function(done) {
     db.Type.remove({})

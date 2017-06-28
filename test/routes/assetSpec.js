@@ -143,7 +143,7 @@ describe('POST /assets/:a_id/childassets', function() {
     });
   });
 
-    it("updates an asset if token is valid", function(done) {
+  it("updates an asset if token is valid", function(done) {
     const token = login(testingData);
     request(app)
       .patch(`/assets/${parent.id}/childassets/${child.id}`)
@@ -157,18 +157,18 @@ describe('POST /assets/:a_id/childassets', function() {
         expect(res.body.url).to.equal('www.brand.com');
       })
       .end(done);
-    });
+  });
 
-    it('it should be invalid if there is no token', function(done) {
-      request(app)
-        .patch(`/assets/${parent.id}}/childassets/${child.id}`)
-        .send({
-          random: 'data'
-        })
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
-    });
+  it('it should be invalid if there is no token', function(done) {
+    request(app)
+      .patch(`/assets/${parent.id}}/childassets/${child.id}`)
+      .send({
+        random: 'data'
+      })
+      .expect(401, {
+        message: "You must be logged in to continue."
+      }, done);
+  });
 
   after(function(done) {
     db.Asset.remove({})

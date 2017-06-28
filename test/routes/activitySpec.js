@@ -72,7 +72,7 @@ describe('GET /users/:u_id/activities/', function() {
       })
   });
 
-  it('responds with an activity if token is valid', function(done) { 
+  it("responds with all of this user's activities if token is valid", function(done) { 
     const token = login(testingData);
     request(app)
       .get(`/users/${activity.user}/activities/`)
@@ -102,6 +102,55 @@ describe('GET /users/:u_id/activities/', function() {
       return db.User.remove({})
     }).then(function() {
       return db.Stage.remove({})
+    }).then(function() {
+      done();
+    });
+  });
+});
+
+describe('POST /users/:u_id/activities', function() {
+  let user = null;
+  before(function(done) {
+    db.User.create(testingData)
+    .then(function(foundUser) {
+      user = foundUser;
+      done();
+    })
+    .catch(function(error){
+      console.log(error);
+    });
+  })
+
+  it('creates an activity for a user if token is valid', function(done) {
+    const token = login(testingData);
+    request(app)
+      .post(`/users/${user.id}/activities`)
+      .send({
+        name: 'Job Search 2017'
+      })
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res, req) {
+        expect(res.body.name).to.equal('Job Search 2017');
+        expect(res.body.id).to.not.be.null;
+        expect(res.body.user._id).to.equal(user.id);
+      })
+      .end(done);
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .post(`/users/${user.id}}/activities`)
+        .send({random:"data"})
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+  after(function(done) {
+    db.Asset.remove({})
+    .then(function() {
+      return db.User.remove({})
     }).then(function() {
       done();
     });
