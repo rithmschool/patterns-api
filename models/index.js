@@ -1,6 +1,7 @@
-var mongoose = require("mongoose");
-mongoose.set('debug', process.env.NODE_ENV !== 'production');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/patterns');
+const mongoose = require("mongoose");
+const config = require('../config');
+mongoose.set('debug', config.mongooseDebug);
+mongoose.connect(config.mongoUri);
 mongoose.Promise = Promise;
 
 module.exports.User = require("./user");

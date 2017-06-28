@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/patterns-testDb');
 const db = require("../../models");
 const app = require("../../app");
 const login = require("../helpers").login;
