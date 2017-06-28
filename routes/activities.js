@@ -1,6 +1,7 @@
-var express = require("express");
-var router = express.Router({mergeParams: true});
-var db = require("../models");
+let express = require("express");
+let router = express.Router({mergeParams: true});
+let db = require("../models");
+let ensureCorrectUser = require('./helpers').ensureCorrectUser_Activities;
 
 router.get('/', function(req, res) {
   db.User.findById(req.params.u_id).populate('activities')
@@ -15,7 +16,7 @@ router.get('/', function(req, res) {
     });
 });
 
-router.post('/', function(req, res) {
+router.post('/', ensureCorrectUser, function(req, res) {
   let newActivity = new db.Activity(req.body);
   let user = null;
   db.User.findById(req.params.u_id)

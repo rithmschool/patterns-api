@@ -49,7 +49,8 @@ router.post('/google/callback',
           googleId: user.googleId,
           firstName: user.firstName,
           lastName: user.lastName,
-          email: user.email
+          email: user.email,
+          mongoId: user._id
         };
         const token = jwt.sign(payload, process.env.SECRET_KEY);
         response.status(200).send(token);

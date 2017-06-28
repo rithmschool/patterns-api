@@ -4,6 +4,7 @@ const db = require("../../models");
 const app = require("../../app");
 const login = require("../helpers").login;
 const testingData = require("../helpers").testingData;
+const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;

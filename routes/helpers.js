@@ -1,7 +1,8 @@
 require('dotenv').load();
 const jwt = require('jsonwebtoken');
+const db = require("../models");
 
-exports.loginRequired = function(req, res, next){
+function loginRequired(req, res, next){
   const authHeader = req.headers['authorization'];
   if (authHeader) {
     let token = authHeader.split(" ")[1];
@@ -20,15 +21,13 @@ exports.loginRequired = function(req, res, next){
   }
 }
 
-exports.ensureCorrectUser = function(req, res, next){
+function ensureCorrectUser_Activities(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
-    let token = authHeader.split(" ")[1];
     try {
+      let token = authHeader.split(" ")[1];
       jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        if(decoded.googleId === req.params.id) {
-          // the token has googleId, firstName, lastName, and email
-          // check what's in req.params
+        if(decoded.mongoId === req.params.u_id) {
           next();
         } else {
           res.status(401).send({
@@ -43,3 +42,30 @@ exports.ensureCorrectUser = function(req, res, next){
     }
   }
 }
+
+function ensureCorrectUser_Assets(req, res, next){
+  const authHeader = req.headers['authorization'];
+  if(authHeader) {
+    let token = authHeader.split(" ")[1];
+    try {
+      jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+        db.Asset.findById(req.params.c_id)
+        .then(function(foundAsset) {
+          if(decoded.mongoId === foundAsset.createdBy.toString()) {
+            next();
+          } else {
+            res.status(401).send({
+              message: "Unauthorized"
+            });
+          }
+        });
+      });
+    } catch(e) {
+      res.status(401).send({
+        message: "Unauthorized"
+      });
+    }
+  }
+}
+
+module.exports = { loginRequired, ensureCorrectUser_Activities, ensureCorrectUser_Assets };

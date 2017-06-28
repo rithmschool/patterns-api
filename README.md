@@ -3,7 +3,7 @@ Node backend for Patterns App
 
 #### `routes/activites.js`
 * `GET all activities (/users/u_id/activities)`
-* `GET specific activity (/users/u_id/activities/a_id)`
+* `POST add new activity (/users/u_id/activities)` - loginRequired, ensureCorrectUser
 
 #### `routes/assets.js`
 * `GET all child assets of a given asset (/assets/a_id/childassets)`

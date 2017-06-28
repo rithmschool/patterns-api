@@ -20,7 +20,11 @@ const stageSchema = new mongoose.Schema({
   assets: [{
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Asset'
-  }]
+  }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 });
 
 stageSchema.plugin(findOrCreate);

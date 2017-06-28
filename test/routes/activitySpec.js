@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/patterns-testDb');
-var db = require("../../models");
-var app = require("../../app");
+const db = require("../../models");
+const app = require("../../app");
 const login = require("../helpers").login;
 const testingData = require("../helpers").testingData;
+const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
@@ -122,6 +123,7 @@ describe('POST /users/:u_id/activities', function() {
   })
 
   it('creates an activity for a user if token is valid', function(done) {
+    testingData.mongoId = user.id;
     const token = login(testingData);
     request(app)
       .post(`/users/${user.id}/activities`)
@@ -140,17 +142,30 @@ describe('POST /users/:u_id/activities', function() {
 
     it('it should be invalid if there is no token', function(done) {
       request(app)
-        .post(`/users/${user.id}}/activities`)
+        .post(`/users/${user.id}/activities`)
         .send({random:"data"})
         .expect(401, {
           message: "You must be logged in to continue."
         }, done);
     });
 
+    it("it should be unauthorized if attempted by another user", function(done) {
+      const token2 = login(testingData2);
+      request(app)
+        .post(`/users/${user.id}/activities`)
+        .send({random:"data"})
+        .set('authorization', 'Bearer: ' + token2)
+        .expect(401, {
+          message: "Unauthorized"
+        }, done);
+    });
+
   after(function(done) {
-    db.Asset.remove({})
+    db.Activity.remove({})
     .then(function() {
       return db.User.remove({})
+    }).then(function() {
+      return db.Stage.remove({})
     }).then(function() {
       done();
     });

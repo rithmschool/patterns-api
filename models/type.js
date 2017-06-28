@@ -12,7 +12,11 @@ const typeSchema = new mongoose.Schema({
   assets: [{
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Asset'
-  }]
+  }],
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
 });
 
 typeSchema.pre('remove', function(next) {
