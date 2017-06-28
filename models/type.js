@@ -15,6 +15,17 @@ const typeSchema = new mongoose.Schema({
   }]
 });
 
+typeSchema.pre('remove', function(next) {
+  let type = this;
+  db.Asset.remove({typeId: type.id})
+  .then(function(foundAssets){
+    next();
+  })
+  .catch(function(err){
+    next(err);
+  });
+});
+
 typeSchema.plugin(findOrCreate);
 const Type = mongoose.model('Type', typeSchema);
 module.exports = Type;
