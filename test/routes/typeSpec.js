@@ -86,6 +86,55 @@ describe('POST /types', function() {
   });
 });
 
+describe('PATCH /types/:t_id', function() {
+  let type = null;
+  before(function(done) {
+    db.Type.create({ 
+      isAgent: false, 
+      name: 'Corporation'
+    })
+    .then(function(newType){
+      type = newType;
+      done();
+    })
+    .catch(function(error){
+      console.log(error);
+    });
+  })
+
+  it('updates a type if token is valid', function(done) {
+    const token = login(testingData);
+    request(app)
+      .patch(`/types/${type.id}`)
+      .send({
+        name:'Business'
+      })
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res) {
+        expect(res.body.name).to.equal('Business');
+        expect(res.body.isAgent).to.be.false;
+      })
+      .end(done);
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .patch(`/types/${type.id}`)
+        .send({random:"data"})
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+  after(function(done) {
+    db.Type.remove({})
+    .then(function() {
+      done();
+    });
+  });
+});
+
 describe('DELETE /types/:t_id', function() {
   let type = null;
   let asset = null;
@@ -279,6 +328,75 @@ describe('POST /types/:id/assets', function() {
   after(function(done) {
     db.Type.remove({})
     .then(function() {
+      return db.Asset.remove({})
+    })
+    .then(function() {
+      done();
+    });
+  });
+});
+
+describe('PATCH /types/:t_id/assets/:a_id', function() {
+  let type = null;
+  let asset = null;
+  before(function(done) {
+    db.Type.create({ 
+      isAgent: false, 
+      name: 'Corporation'
+    })
+    .then(function(newType){
+      type = newType;
+      return db.Asset.create({
+        name: 'Microsoft',
+        url: 'https://www.microsoft.com/en-us/',
+        logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
+        typeId: newType.id
+      });
+    })
+    .then(function(newAsset) {
+      asset = newAsset;
+      type.assets.push(asset._id);
+      return type.save()
+    })
+    .then(function() {
+      done();
+    })
+    .catch(function(error){
+      console.log(error);
+    });
+  })
+
+  it('updates an asset of the given type if token is valid', function(done) {
+    const token = login(testingData);
+    request(app)
+      .patch(`/types/${type.id}/assets/${asset.id}`)
+      .send({
+        name:'Amazon'
+      })
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res) {
+        expect(res.body.name).to.equal('Amazon');
+        expect(res.body.url).to.equal('https://www.microsoft.com/en-us/');
+      })
+      .end(done);
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .patch(`/types/${type.id}/assets/${asset.id}`)
+        .send({random:"data"})
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+  after(function(done) {
+    db.Type.remove({})
+    .then(function() {
+      return db.Asset.remove({})
+    })
+    .then(function() {
       done();
     });
   });
@@ -356,7 +474,10 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
     });
 
   after(function(done) {
-    db.Asset.remove({})
+    db.Type.remove({})
+    .then(function() {
+      return db.Asset.remove({})
+    })
     .then(function() {
       done();
     });

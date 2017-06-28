@@ -36,6 +36,16 @@ router.post('/', function(req, res) {
     });
 });
 
+router.patch('/:c_id', function(req, res) {
+  db.Asset.findByIdAndUpdate(req.params.c_id, req.body, {new: true})
+  .then(function(updatedAsset) {
+    res.status(200).send(updatedAsset);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+});
+
 router.delete('/:c_id', function(req, res) {
   db.Asset.findById(req.params.c_id)
   .then(function(target){

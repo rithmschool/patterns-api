@@ -22,6 +22,16 @@ router.post('/', function(req, res) {
     });
 });
 
+router.patch('/:t_id', function(req, res) {
+  db.Type.findByIdAndUpdate(req.params.t_id, req.body, {new: true})
+  .then(function(updatedType) {
+    res.status(200).send(updatedType);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+});
+
 router.delete('/:t_id', function(req, res) {
   db.Type.findById(req.params.t_id)
   .then(function(foundType) {
@@ -64,6 +74,16 @@ router.post('/:t_id/assets', function(req, res) {
     .catch(function(err){
       res.status(500).send(err);
     });
+});
+
+router.patch('/:t_id/assets/:a_id', function(req, res) {
+  db.Asset.findByIdAndUpdate(req.params.a_id, req.body, {new: true})
+  .then(function(updatedAsset) {
+    res.status(200).send(updatedAsset);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
 });
 
 router.delete('/:t_id/assets/:a_id', function(req, res) {

@@ -111,6 +111,73 @@ describe('POST /assets/:a_id/childassets', function() {
   });
 });
 
+  describe('PATCH /assets/:a_id/childassets/:c_id', function() {
+    let child = null;
+    let parent = null;
+    before(function(done) {
+      db.Asset.create({
+      name: 'Microsoft',
+      url: 'https://www.microsoft.com/en-us/',
+      logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png'
+    })
+    .then(function(parentAsset) {
+      parent = parentAsset;
+    })
+    .then(function() {
+      child = new db.Asset({
+        name: 'Brand',
+        url: 'www.brand.com',
+        parent: parent.id
+      })
+      return child.save()
+    })
+    .then(function(child) {
+      parent.assets.push(child._id);
+      return parent.save()
+    })
+    .then(function() {
+      done();
+    })
+    .catch(function(error){
+      console.log(error);
+    });
+  });
+
+    it("updates an asset if token is valid", function(done) {
+    const token = login(testingData);
+    request(app)
+      .patch(`/assets/${parent.id}/childassets/${child.id}`)
+      .send({
+        name: 'Employees'
+      })
+      .set('authorization', 'Bearer: ' + token)
+      .expect(200)
+      .expect(function(res, req) {
+        expect(res.body.name).to.equal('Employees');
+        expect(res.body.url).to.equal('www.brand.com');
+      })
+      .end(done);
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .patch(`/assets/${parent.id}}/childassets/${child.id}`)
+        .send({
+          random: 'data'
+        })
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+  after(function(done) {
+    db.Asset.remove({})
+    .then(function() {
+      done();
+    });
+  });
+});
+
 describe('DELETE /assets/:a_id/childassets/:c_id', function() {
   let parent = null; // Microsoft
   let child = null; // Brand (target)
