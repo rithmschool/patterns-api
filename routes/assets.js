@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router({mergeParams: true});
 const jwt = require('jsonwebtoken');
-var db = require("../models");
-let ensureCorrectUser = require('./helpers').ensureCorrectUser_Assets;
+const db = require("../models");
+const ensureCorrectUser = require('./helpers').ensureCorrectUser_Assets;
 
 router.get('/', function(req, res) {
   db.Asset.findById(req.params.a_id).populate('assets')

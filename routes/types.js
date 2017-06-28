@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const db = require("../models");
+const ensureCorrectUser = require('./helpers').ensureCorrectUser_Types;
 
 router.get('/', function(req, res) {
   db.Type.find()
@@ -22,7 +24,7 @@ router.post('/', function(req, res) {
     });
 });
 
-router.patch('/:t_id', function(req, res) {
+router.patch('/:t_id', ensureCorrectUser, function(req, res) {
   db.Type.findByIdAndUpdate(req.params.t_id, req.body, {new: true})
   .then(function(updatedType) {
     res.status(200).send(updatedType);
@@ -32,7 +34,7 @@ router.patch('/:t_id', function(req, res) {
   });
 });
 
-router.delete('/:t_id', function(req, res) {
+router.delete('/:t_id', ensureCorrectUser, function(req, res) {
   db.Type.findById(req.params.t_id)
   .then(function(foundType) {
     foundType.remove();
@@ -76,7 +78,7 @@ router.post('/:t_id/assets', function(req, res) {
     });
 });
 
-router.patch('/:t_id/assets/:a_id', function(req, res) {
+router.patch('/:t_id/assets/:a_id', ensureCorrectUser, function(req, res) {
   db.Asset.findByIdAndUpdate(req.params.a_id, req.body, {new: true})
   .then(function(updatedAsset) {
     res.status(200).send(updatedAsset);
@@ -86,7 +88,7 @@ router.patch('/:t_id/assets/:a_id', function(req, res) {
   });
 });
 
-router.delete('/:t_id/assets/:a_id', function(req, res) {
+router.delete('/:t_id/assets/:a_id', ensureCorrectUser, function(req, res) {
   db.Asset.findById(req.params.a_id)
   .then(function(foundAsset){
     foundAsset.remove();

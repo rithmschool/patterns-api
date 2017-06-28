@@ -51,9 +51,40 @@ function ensureCorrectUser_Assets(req, res, next){
       jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
         db.Asset.findById(req.params.c_id)
         .then(function(foundAsset) {
+          console.log("FOUND ASSET",foundAsset)
           if(decoded.mongoId === foundAsset.createdBy.toString()) {
+            console.log("CORRECT USER!!");
             next();
           } else {
+            console.log("WRONG USER!!")
+            res.status(401).send({
+              message: "Unauthorized"
+            });
+          }
+        });
+      });
+    } catch(e) {
+      res.status(401).send({
+        message: "Unauthorized"
+      });
+    }
+  }
+}
+
+function ensureCorrectUser_Types(req, res, next){
+  const authHeader = req.headers['authorization'];
+  if(authHeader) {
+    let token = authHeader.split(" ")[1];
+    try {
+      jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+        db.Asset.findById(req.params.c_id)
+        .then(function(foundAsset) {
+          console.log("FOUND ASSET",foundAsset)
+          if(decoded.mongoId === foundAsset.createdBy.toString()) {
+            console.log("CORRECT USER!!");
+            next();
+          } else {
+            console.log("WRONG USER!!")
             res.status(401).send({
               message: "Unauthorized"
             });
