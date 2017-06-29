@@ -112,43 +112,44 @@ describe('POST /assets/:a_id/childassets', function() {
   });
 });
 
-  describe('PATCH /assets/:a_id/childassets/:c_id', function() {
-    let child = null;
-    let parent = null;
-    let user = null;
-    before(function(done) {
-      db.User.create(testingData)
-      .then(function(newUser) {
-        user = newUser;
-        db.Asset.create({
-        name: 'Microsoft',
-        url: 'https://www.microsoft.com/en-us/',
-        logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        })
-        .then(function(parentAsset) {
-          parent = parentAsset;
-        })
-        .then(function() {
-          child = new db.Asset({
-            name: 'Brand',
-            url: 'www.brand.com',
-            parent: parent.id,
-            createdBy: user._id
-          })
-          return child.save()
-        })
-        .then(function(child) {
-          parent.assets.push(child._id);
-          return parent.save()
-        })
-        .then(function() {
-          done();
-        })
-        .catch(function(error){
-          console.log(error);
-        });
+describe('PATCH /assets/:a_id/childassets/:c_id', function() {
+  let child = null;
+  let parent = null;
+  let user = null;
+  before(function(done) {
+    db.User.create(testingData)
+    .then(function(newUser) {
+      user = newUser;
+      let asset = new db.Asset({
+      name: 'Microsoft',
+      url: 'https://www.microsoft.com/en-us/',
+      logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
+      });
+      return asset.save();
+    })
+    .then(function(parentAsset) {
+      parent = parentAsset;
+    })
+    .then(function() {
+      child = new db.Asset({
+        name: 'Brand',
+        url: 'www.brand.com',
+        parent: parent.id,
+        createdBy: user._id
       })
+      return child.save()
+    })
+    .then(function(child) {
+      parent.assets.push(child._id);
+      return parent.save()
+    })
+    .then(function() {
+      done();
+    })
+    .catch(function(error){
+      console.log(error);
     });
+  });
 
   it("updates an asset if token is valid", function(done) {
     const token = login(user);
@@ -208,7 +209,7 @@ describe('DELETE /assets/:a_id/childassets/:c_id', function() {
     db.User.create(testingData)
     .then(function(newUser) {
       user = newUser;
-      var asset = new db.Asset({
+      let asset = new db.Asset({
         name: 'Microsoft',
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png'

@@ -68,8 +68,8 @@ describe('GET /users/:u_id/activities/', function() {
       .then(function(){ 
         done();
       })
-      .catch(function(err){
-        console.log(err);
+      .catch(function(error){
+        console.log(error);
       })
   });
 
@@ -123,8 +123,7 @@ describe('POST /users/:u_id/activities', function() {
   })
 
   it('creates an activity for a user if token is valid', function(done) {
-    testingData.mongoId = user.id;
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .post(`/users/${user.id}/activities`)
       .send({

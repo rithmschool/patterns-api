@@ -49,19 +49,29 @@ function ensureCorrectUser_Assets(req, res, next){
     let token = authHeader.split(" ")[1];
     try {
       jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        db.Asset.findById(req.params.c_id)
-        .then(function(foundAsset) {
-          console.log("FOUND ASSET",foundAsset)
-          if(decoded.mongoId === foundAsset.createdBy.toString()) {
-            console.log("CORRECT USER!!");
-            next();
-          } else {
-            console.log("WRONG USER!!")
-            res.status(401).send({
-              message: "Unauthorized"
-            });
-          }
-        });
+        if(req.params.c_id) {
+          db.Asset.findById(req.params.c_id)
+          .then(function(foundAsset) {
+            if(decoded.mongoId === foundAsset.createdBy.toString()) {
+              next();
+            } else {
+              res.status(401).send({
+                message: "Unauthorized"
+              });
+            }
+          });
+        } else if (req.params.a_id) {
+          db.Asset.findById(req.params.a_id)
+          .then(function(foundAsset) {
+            if(decoded.mongoId === foundAsset.createdBy.toString()) {
+              next();
+            } else {
+              res.status(401).send({
+                message: "Unauthorized"
+              });
+            }
+          });
+        }
       });
     } catch(e) {
       res.status(401).send({
@@ -77,14 +87,11 @@ function ensureCorrectUser_Types(req, res, next){
     let token = authHeader.split(" ")[1];
     try {
       jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        db.Asset.findById(req.params.c_id)
-        .then(function(foundAsset) {
-          console.log("FOUND ASSET",foundAsset)
-          if(decoded.mongoId === foundAsset.createdBy.toString()) {
-            console.log("CORRECT USER!!");
+        db.Type.findById(req.params.t_id)
+        .then(function(foundType) {
+          if(decoded.mongoId === foundType.createdBy.toString()) {
             next();
           } else {
-            console.log("WRONG USER!!")
             res.status(401).send({
               message: "Unauthorized"
             });
@@ -99,4 +106,9 @@ function ensureCorrectUser_Types(req, res, next){
   }
 }
 
-module.exports = { loginRequired, ensureCorrectUser_Activities, ensureCorrectUser_Assets };
+module.exports = { 
+  loginRequired, 
+  ensureCorrectUser_Activities, 
+  ensureCorrectUser_Assets, 
+  ensureCorrectUser_Types 
+};

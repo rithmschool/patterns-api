@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const db = require("../models");
-const ensureCorrectUser = require('./helpers').ensureCorrectUser_Types;
+const ensureCorrectUser_Types = require('./helpers').ensureCorrectUser_Types;
+const ensureCorrectUser_Assets = require('./helpers').ensureCorrectUser_Assets;
 
 router.get('/', function(req, res) {
   db.Type.find()
@@ -17,6 +18,13 @@ router.get('/', function(req, res) {
 router.post('/', function(req, res) {
   db.Type.create(req.body)
     .then(function(newType) {
+      const authHeader = req.headers['authorization'];
+      if(authHeader) {
+        let token = authHeader.split(" ")[1];
+        jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+          newType.createdBy = decoded.mongoId;
+        });
+      }
       res.send(newType);
     })
     .catch(function(err) {
@@ -24,7 +32,7 @@ router.post('/', function(req, res) {
     });
 });
 
-router.patch('/:t_id', ensureCorrectUser, function(req, res) {
+router.patch('/:t_id', ensureCorrectUser_Types, function(req, res) {
   db.Type.findByIdAndUpdate(req.params.t_id, req.body, {new: true})
   .then(function(updatedType) {
     res.status(200).send(updatedType);
@@ -34,7 +42,7 @@ router.patch('/:t_id', ensureCorrectUser, function(req, res) {
   });
 });
 
-router.delete('/:t_id', ensureCorrectUser, function(req, res) {
+router.delete('/:t_id', ensureCorrectUser_Types, function(req, res) {
   db.Type.findById(req.params.t_id)
   .then(function(foundType) {
     foundType.remove();
@@ -61,6 +69,13 @@ router.post('/:t_id/assets', function(req, res) {
   let newAsset = new db.Asset(req.body);
   let type = null;
   newAsset.typeId = req.params.t_id;
+  const authHeader = req.headers['authorization'];
+  if(authHeader) {
+    let token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+      newAsset.createdBy = decoded.mongoId;
+    });
+  }
   db.Type.findById(req.params.t_id)
     .then(function(foundType) {
       type = foundType;
@@ -78,7 +93,7 @@ router.post('/:t_id/assets', function(req, res) {
     });
 });
 
-router.patch('/:t_id/assets/:a_id', ensureCorrectUser, function(req, res) {
+router.patch('/:t_id/assets/:a_id', ensureCorrectUser_Assets, function(req, res) {
   db.Asset.findByIdAndUpdate(req.params.a_id, req.body, {new: true})
   .then(function(updatedAsset) {
     res.status(200).send(updatedAsset);
@@ -88,7 +103,7 @@ router.patch('/:t_id/assets/:a_id', ensureCorrectUser, function(req, res) {
   });
 });
 
-router.delete('/:t_id/assets/:a_id', ensureCorrectUser, function(req, res) {
+router.delete('/:t_id/assets/:a_id', ensureCorrectUser_Assets, function(req, res) {
   db.Asset.findById(req.params.a_id)
   .then(function(foundAsset){
     foundAsset.remove();

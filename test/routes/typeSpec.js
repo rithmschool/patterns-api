@@ -89,10 +89,17 @@ describe('POST /types', function() {
 
 describe('PATCH /types/:t_id', function() {
   let type = null;
+  let user = null;
   before(function(done) {
-    db.Type.create({ 
-      isAgent: false, 
-      name: 'Corporation'
+    db.User.create(testingData)
+    .then(function(newUser) {
+      user = newUser;
+      let type = new db.Type({ 
+        isAgent: false, 
+        name: 'Corporation',
+        createdBy: user._id
+      })
+      return type.save();
     })
     .then(function(newType){
       type = newType;
@@ -101,10 +108,10 @@ describe('PATCH /types/:t_id', function() {
     .catch(function(error){
       console.log(error);
     });
-  })
+  });
 
   it('updates a type if token is valid', function(done) {
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .patch(`/types/${type.id}`)
       .send({
@@ -117,19 +124,33 @@ describe('PATCH /types/:t_id', function() {
         expect(res.body.isAgent).to.be.false;
       })
       .end(done);
-    });
+  });
 
-    it('it should be invalid if there is no token', function(done) {
-      request(app)
-        .patch(`/types/${type.id}`)
-        .send({random:"data"})
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
-    });
+  it('it should be invalid if there is no token', function(done) {
+    request(app)
+      .patch(`/types/${type.id}`)
+      .send({random:"data"})
+      .expect(401, {
+        message: "You must be logged in to continue."
+      }, done);
+  });
+
+  it("it should be unauthorized if attempted by another user", function(done) {
+  const token2 = login(testingData2);
+  request(app)
+    .patch(`/types/${type.id}`)
+    .send({random:"data"})
+    .set('authorization', 'Bearer: ' + token2)
+    .expect(401, {
+      message: "Unauthorized"
+    }, done);
+  });
 
   after(function(done) {
     db.Type.remove({})
+    .then(function() {
+      return db.User.remove({})
+    })
     .then(function() {
       done();
     });
@@ -139,10 +160,17 @@ describe('PATCH /types/:t_id', function() {
 describe('DELETE /types/:t_id', function() {
   let type = null;
   let asset = null;
+  let user = null;
   before(function(done) {
-    db.Type.create({
-      isAgent: true,
-      name: 'Employees'
+    db.User.create(testingData)
+    .then(function(newUser) {
+      user = newUser;
+      let type = new db.Type({
+        isAgent: true,
+        name: 'Employees',
+        createdBy: user._id
+      });
+      return type.save();
     })
     .then(function(newType) {
       type = newType;
@@ -165,7 +193,7 @@ describe('DELETE /types/:t_id', function() {
   });
 
   it('deletes a type and all assets of that type if token is valid', function(done) { 
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .delete(`/types/${type.id}`)
       .set('authorization', 'Bearer: ' + token)
@@ -194,10 +222,23 @@ describe('DELETE /types/:t_id', function() {
       }, done);
   });
 
+  it("it should be unauthorized if attempted by another user", function(done) {
+    const token2 = login(testingData2);
+    request(app)
+      .patch(`/types/${type.id}`)
+      .set('authorization', 'Bearer: ' + token2)
+      .expect(401, {
+        message: "Unauthorized"
+      }, done);
+  });
+
   after(function(done) {
     db.Type.remove({})
     .then(function() {
       return db.Asset.remove({})
+    })
+    .then(function() {
+      return db.User.remove({})
     })
     .then(function() {
       done();
@@ -250,15 +291,6 @@ describe('GET /types/:id/assets', function() {
       })
       .end(done);
   }); 
-
-  it('should be invalid if token is invalid', function(done) {
-    request(app)
-      .get(`/types/${type.id}/assets`)
-      .set('authorization', 'Bearer: ' + jwt.sign(testingData, 'wrong key'))
-      .expect(401, {
-        message: "Invalid user."
-      }, done);
-  });
 
   it('it should be invalid if there is no token', function(done) {
     request(app)
@@ -338,10 +370,16 @@ describe('POST /types/:id/assets', function() {
 describe('PATCH /types/:t_id/assets/:a_id', function() {
   let type = null;
   let asset = null;
+  let user = null;
   before(function(done) {
-    db.Type.create({ 
-      isAgent: false, 
-      name: 'Corporation'
+    db.User.create(testingData)
+    .then(function(newUser) {
+      user = newUser;
+      let type = new db.Type({ 
+        isAgent: false, 
+        name: 'Corporation'
+      });
+      return type.save();
     })
     .then(function(newType){
       type = newType;
@@ -349,7 +387,8 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
         name: 'Microsoft',
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        typeId: newType.id
+        typeId: newType.id,
+        createdBy: user._id
       });
     })
     .then(function(newAsset) {
@@ -363,10 +402,10 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
     .catch(function(error){
       console.log(error);
     });
-  })
+  });
 
   it('updates an asset of the given type if token is valid', function(done) {
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .patch(`/types/${type.id}/assets/${asset.id}`)
       .send({
@@ -396,6 +435,9 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
       return db.Asset.remove({})
     })
     .then(function() {
+      return db.User.remove({})
+    })
+    .then(function() {
       done();
     });
   });
@@ -404,10 +446,16 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
 describe('DELETE /types/:t_id/assets/:a_id', function() {
   let asset = null; // Microsoft
   let type = null; // Corporation
+  let user = null;
   before(function(done) {
-    db.Type.create({ 
-      isAgent: false, 
-      name: 'Corporation'
+    db.User.create(testingData)
+    .then(function(newUser) {
+      user = newUser;
+      let type = new db.Type({ 
+        isAgent: false, 
+        name: 'Corporation'
+      });
+      return type.save();
     })
     .then(function(newType){
       type = newType;
@@ -415,7 +463,8 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
         name: 'Microsoft',
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        typeId: newType.id
+        typeId: newType.id,
+        createdBy: user._id
       });
     })
     .then(function(newAsset) {
@@ -432,7 +481,7 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
   })
 
   it("deletes asset of a certain type and asset's descendants if token is valid", function(done) {
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .delete(`/types/${type.id}/assets/${asset.id}`)
       .set('authorization', 'Bearer: ' + token)
@@ -471,6 +520,9 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
     db.Type.remove({})
     .then(function() {
       return db.Asset.remove({})
+    })
+    .then(function() {
+      return db.User.remove({})
     })
     .then(function() {
       done();
