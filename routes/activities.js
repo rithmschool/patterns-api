@@ -17,6 +17,20 @@ router.get('/', function(req, res) {
     });
 });
 
+router.get('/:a_id', function(req, res) {
+  db.Activity.findById(req.params.a_id).populate({
+    path:'stages',
+    populate: {
+      path: 'assets'
+    } 
+  })
+  .then(function(activity){
+    res.send(activity);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+
 router.post('/', ensureCorrectUser, function(req, res) {
   let newActivity = new db.Activity(req.body);
   let user = null;
