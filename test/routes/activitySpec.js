@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/patterns-testDb');
-var db = require("../../models");
-var app = require("../../app");
+const db = require("../../models");
+const app = require("../../app");
 const login = require("../helpers").login;
 const testingData = require("../helpers").testingData;
+const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
@@ -14,14 +15,23 @@ describe('GET /users/:u_id/activities/', function() {
   let stage = null;
   let stage2 = null;
   let user = null;
+  let asset = null;
   before(function(done) {
-    user = new db.User(testingData);
-    user.save()
+    db.User.create(testingData)
       .then(function(newUser){
         user = newUser;
+        asset = new db.Asset({
+          name: "Company",
+          createdBy: user.id
+        });
+        return asset.save();
+      })
+      .then(function(rootAsset){
+        asset = rootAsset;
         activity = new db.Activity({
           name: 'Job search June 2017',
-          user: newUser.id
+          user: user.id,
+          rootAssetType: asset.id,
         });
         return activity.save();
       })
@@ -33,7 +43,8 @@ describe('GET /users/:u_id/activities/', function() {
       .then(function(user) {
         stage = new db.Stage({
           name: 'Research',
-          activity: activity.id
+          activity: activity.id,
+          createdBy: user.id
         })
         return stage.save()
       })
@@ -44,7 +55,8 @@ describe('GET /users/:u_id/activities/', function() {
       .then(function(activity){
         activity2 = new db.Activity({
           name: 'Job search August 2017',
-          user: user.id
+          user: user.id,
+          rootAssetType: asset.id
         });
         return activity2.save();
       })
@@ -56,7 +68,8 @@ describe('GET /users/:u_id/activities/', function() {
       .then(function(user) {
         stage2 = new db.Stage({
           name: 'Follow-up',
-          activity: activity2.id
+          activity: activity2.id,
+          createdBy: user.id
         })
         return stage2.save()
       })
@@ -67,8 +80,8 @@ describe('GET /users/:u_id/activities/', function() {
       .then(function(){ 
         done();
       })
-      .catch(function(err){
-        console.log(err);
+      .catch(function(error){
+        console.log(error);
       })
   });
 
@@ -97,23 +110,27 @@ describe('GET /users/:u_id/activities/', function() {
   });
 
   after(function(done) {
-    db.Activity.remove({})
-    .then(function() {
-      return db.User.remove({})
-    }).then(function() {
-      return db.Stage.remove({})
-    }).then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
 describe('POST /users/:u_id/activities', function() {
   let user = null;
+  let asset = null;
   before(function(done) {
     db.User.create(testingData)
     .then(function(foundUser) {
       user = foundUser;
+      let newAsset = new db.Asset({
+        name: "Microsoft",
+        createdBy: user.id
+      })
+      return newAsset.save();
+    })
+    .then(function(newAsset) {
+      asset = newAsset;
       done();
     })
     .catch(function(error){
@@ -122,11 +139,12 @@ describe('POST /users/:u_id/activities', function() {
   })
 
   it('creates an activity for a user if token is valid', function(done) {
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .post(`/users/${user.id}/activities`)
       .send({
-        name: 'Job Search 2017'
+        name: 'Job Search 2017',
+        rootAssetType: asset.id
       })
       .set('authorization', 'Bearer: ' + token)
       .expect(200)
@@ -140,19 +158,33 @@ describe('POST /users/:u_id/activities', function() {
 
     it('it should be invalid if there is no token', function(done) {
       request(app)
-        .post(`/users/${user.id}}/activities`)
-        .send({random:"data"})
+        .post(`/users/${user.id}/activities`)
+        .send({
+          name: 'Job Search 2017',
+          rootAssetType: 'Company'
+        })
         .expect(401, {
           message: "You must be logged in to continue."
         }, done);
     });
 
-  after(function(done) {
-    db.Asset.remove({})
-    .then(function() {
-      return db.User.remove({})
-    }).then(function() {
-      done();
+    it("it should be unauthorized if attempted by another user", function(done) {
+      const token2 = login(testingData2);
+      request(app)
+        .post(`/users/${user.id}/activities`)
+        .send({
+          name: 'Job Search 2017',
+          rootAssetType: 'Company'
+        })
+        .set('authorization', 'Bearer: ' + token2)
+        .expect(401, {
+          message: "Unauthorized"
+        }, done);
     });
+
+  after(function(done) {
+    mongoose.connection.db.dropDatabase(function() {
+      done();
+    })
   });
 });

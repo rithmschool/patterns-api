@@ -1,6 +1,8 @@
-var express = require("express");
-var router = express.Router({mergeParams: true});
-var db = require("../models");
+let express = require("express");
+let router = express.Router({mergeParams: true});
+const jwt = require('jsonwebtoken');
+let db = require("../models");
+let ensureCorrectUser = require('./helpers').ensureCorrectUserActivities;
 
 router.get('/', function(req, res) {
   db.User.findById(req.params.u_id).populate('activities')
@@ -29,9 +31,16 @@ router.get('/:a_id', function(req, res) {
     res.status(500).send(err);
   });
 
-router.post('/', function(req, res) {
+router.post('/', ensureCorrectUser, function(req, res) {
   let newActivity = new db.Activity(req.body);
   let user = null;
+  const authHeader = req.headers['authorization'];
+  if(authHeader) {
+    let token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+      newActivity.createdBy = decoded.mongoId;
+    });
+  }
   db.User.findById(req.params.u_id)
     .then(function(foundUser) {
       user = foundUser;

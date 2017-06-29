@@ -11,6 +11,14 @@ describe('asset model', function() {
     });
   });
 
+  it('should be invalid if createdBy is empty', function(done) {
+    var a = new Asset();
+    a.validate(function(err) {
+      expect(err.errors.createdBy).to.exist;
+      done();
+    });
+  });
+
   it('should create a default createdAt date', function(done) {
     var a = new Asset( { name: 'company '});
     expect(a.createdAt).to.be.a('date');

@@ -13,9 +13,16 @@ describe('type model', function() {
 
   it('should be invalid if isAgent is empty', function(done) {
     var t = new Type();
-
     t.validate(function(err) {
       expect(err.errors.isAgent).to.exist;
+      done();
+    });
+  });
+
+  it('should be invalid if createdBy is empty', function(done) {
+    var t = new Type();
+    t.validate(function(err) {
+      expect(err.errors.createdBy).to.exist;
       done();
     });
   });
