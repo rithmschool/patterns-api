@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Type = require("./type");
 const findOrCreate = require('mongoose-findorcreate');
 const assetSchema = new mongoose.Schema({
   name: {
@@ -18,7 +19,8 @@ const assetSchema = new mongoose.Schema({
   },
   typeId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Type'
+    ref: 'Type',
+    required: true
   },
   parent: {
     type: mongoose.Schema.Types.ObjectId,
@@ -33,18 +35,32 @@ const assetSchema = new mongoose.Schema({
 
 assetSchema.pre('remove', function(next) {
   let target = this;
-  let parent = null;
-  this.constructor.remove({parent: target.id})
+  Asset.find({parent: target.id})
+  .then(function(childAssets) {
+    // remove all child assets
+    return Promise.all(childAssets.map(function(child) {
+      return child.remove();
+    }))
+  })
   .then(function(){
-    return this.constructor.findById(target.parent);
+    // remove target from parent, if it has a parent
+    return Asset.findById(target.parent);
   })
   .then(function(foundParent){
     if(foundParent){
-      parent = foundParent;
-      let foundIdx = parent.assets.indexOf(target.id);
-      parent.assets.splice(foundIdx, 1);
-      return parent.save();
+      let foundIdx = foundParent.assets.indexOf(target.id);
+      foundParent.assets.splice(foundIdx, 1);
+      return foundParent.save();
     }
+  })
+  .then(function() {
+    // remove target from array of assets of same type
+    return Type.find(({typeId: target.id}))
+  })
+  .then(function(type) {
+    let foundIdx = type.assets.indexOf(target.id);
+    type.assets.splice(foundIdx, 1);
+    return type.save();
   })
   .then(function(){
     next();

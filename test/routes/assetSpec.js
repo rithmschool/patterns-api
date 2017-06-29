@@ -5,9 +5,10 @@ const testingData = require("../helpers").testingData;
 const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
-describe('GET /assets/:a_id/childassets', function() {
+xdescribe('GET /assets/:a_id/childassets', function() {
   let asset = null;
   let child = null;
   let user = null;
@@ -38,9 +39,7 @@ describe('GET /assets/:a_id/childassets', function() {
     .then(function() {
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   });
 
   it('adds a child asset to asset list if token is valid', function(done) {
@@ -66,7 +65,7 @@ describe('GET /assets/:a_id/childassets', function() {
   });
 });
 
-describe('POST /assets/:a_id/childassets', function() {
+xdescribe('POST /assets/:a_id/childassets', function() {
   let parent = null;
   let user = null;
   before(function(done) {
@@ -85,9 +84,7 @@ describe('POST /assets/:a_id/childassets', function() {
       parent = parentAsset;
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   })
 
   it('creates a child asset of a parent asset if token is valid', function(done) {
@@ -123,7 +120,7 @@ describe('POST /assets/:a_id/childassets', function() {
   });
 });
 
-describe('PATCH /assets/:a_id/childassets/:c_id', function() {
+xdescribe('PATCH /assets/:a_id/childassets/:c_id', function() {
   let child = null;
   let parent = null;
   let user = null;
@@ -132,10 +129,10 @@ describe('PATCH /assets/:a_id/childassets/:c_id', function() {
     .then(function(newUser) {
       user = newUser;
       let asset = new db.Asset({
-      name: 'Microsoft',
-      url: 'https://www.microsoft.com/en-us/',
-      logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-      createdBy: user.id
+        name: 'Microsoft',
+        url: 'https://www.microsoft.com/en-us/',
+        logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
+        createdBy: user.id
       });
       return asset.save();
     })
@@ -143,7 +140,7 @@ describe('PATCH /assets/:a_id/childassets/:c_id', function() {
       parent = parentAsset;
     })
     .then(function() {
-      child = new db.Asset({
+      return db.Asset.create({
         name: 'Brand',
         url: 'www.brand.com',
         parent: parent.id,
@@ -151,16 +148,15 @@ describe('PATCH /assets/:a_id/childassets/:c_id', function() {
       })
       return child.save()
     })
-    .then(function(child) {
-      parent.assets.push(child._id);
-      return parent.save()
+    .then(function(childAsset) {
+      child = childAsset
+      parent.assets.push(child.id);
+      return parent.save();
     })
     .then(function() {
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   });
 
   it("updates an asset if token is valid", function(done) {
@@ -208,56 +204,64 @@ describe('PATCH /assets/:a_id/childassets/:c_id', function() {
   });
 });
 
-describe('DELETE /assets/:a_id/childassets/:c_id', function() {
+xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
   let parent = null; // Microsoft
   let child = null; // Brand (target)
   let grandchild = null; // Logo
   let user = null;
+  let type = null;
   before(function(done) {
     db.User.create(testingData)
     .then(function(newUser) {
       user = newUser;
-      let asset = new db.Asset({
+      let type = new db.Type({
+        isAgent: true,
+        name: 'Company'
+      })
+      return type.save();
+    .then(function(newType) {
+      type = newType;
+      return db.Asset.create({
         name: 'Microsoft',
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
+        typeId: type.id,
         createdBy: user.id
-      });
-      return asset.save();
+      })
     })
     .then(function(parentAsset) {
       parent = parentAsset;
     })
     .then(function() {
-      child = new db.Asset({
+      return db.Asset.create({
         name: 'Brand',
         parent: parent.id,
         createdBy: user.id
       })
       return child.save()
     })
-    .then(function(child) {
+    .then(function(childAsset) {
+      child = childAsset;
       parent.assets.push(child._id);
       return parent.save()
     })
     .then(function(parent) {
-      grandchild = new db.Asset({
+      return db.Asset.create({
         name: 'Logo',
         parent: child.id,
         createdBy: user.id
       })
       return grandchild.save()
     })
-    .then(function(grandchild) {
+    .then(function(foundGrandchild) {
+      grandchild = foundGrandchild;
       child.assets.push(grandchild._id);
       return child.save()
     })
     .then(function() {
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   });
 
   it("deletes target, target from parent's assets array, and target's descendants if token is valid", function(done) {
@@ -268,29 +272,21 @@ describe('DELETE /assets/:a_id/childassets/:c_id', function() {
       .expect(200)
       .expect(function(res, req) {
         expect(res.body).to.deep.equal({});
+      })
+      .end(function() {
         db.Asset.findById(parent.id)
         .then(function(foundParent) {
           expect(foundParent.assets.indexOf(child.id)).to.equal(-1);
         })
         .then(function(){
-          db.Asset.findOne(grandchild);
+          return db.Asset.findOne(grandchild);
         })
         .then(function(foundGrandchild) {
-          expect(foundGrandchild).to.equal(null);
-        })
-        .then(function() {
+          expect(foundGrandchild).to.be.null;
           done();
         })
-        .catch(function(error){
-          console.log(error);
-        });
+        .catch(done);
       })
-      .then(function() {
-        done();
-      })
-      .catch(function(error){
-        console.log(error);
-      });
     });
 
     it('it should be invalid if there is no token', function(done) {

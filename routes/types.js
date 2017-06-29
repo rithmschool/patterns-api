@@ -46,10 +46,10 @@ router.patch('/:t_id', ensureCorrectUserTypes, function(req, res) {
 router.delete('/:t_id', ensureCorrectUserTypes, function(req, res) {
   db.Type.findById(req.params.t_id)
   .then(function(foundType) {
-    foundType.remove();
+    return foundType.remove();
   })
   .then(function(){
-    res.send(200);
+    res.sendStatus(200);
   })
   .catch(function(err){
     res.status(500).send(err);
@@ -110,7 +110,7 @@ router.delete('/:t_id/assets/:a_id', ensureCorrectUserAssets, function(req, res)
     foundAsset.remove();
   })
   .then(function(){
-    res.send(200);
+    res.sendStatus(200);
   })
   .catch(function(err){
     res.status(500).send(err);

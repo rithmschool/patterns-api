@@ -5,6 +5,7 @@ const testingData = require("../helpers").testingData;
 const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
 describe('GET /types', function() {
@@ -25,9 +26,7 @@ describe('GET /types', function() {
       type = newType;
       done();
     })
-    .catch(function(error) {
-      console.log(error);
-    });
+    .catch(done);
   });
 
   it('responds with a type if token is valid', function(done) { 
@@ -122,10 +121,8 @@ describe('PATCH /types/:t_id', function() {
       type = newType;
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
-  });
+    .catch(done);
+  })
 
   it('updates a type if token is valid', function(done) {
     const token = login(user);
@@ -201,31 +198,27 @@ describe('DELETE /types/:t_id', function() {
     .then(function() {
       done();
     })
-    .catch(function(error) {
-      console.log(error);
-    });
+    .catch(done);
   });
 
-  it('deletes a type and all assets of that type if token is valid', function(done) { 
+  xit('deletes a type and all assets of that type if token is valid', function(done) { 
     const token = login(user);
     request(app)
       .delete(`/types/${type.id}`)
       .set('authorization', 'Bearer: ' + token)
       .expect(200)
-      .expect(function(res) {
+      .end(function(err, res) {
+        if (err) return done(err);
         expect(res.body).to.deep.equal({});
         db.Asset.find({typeId: type.id})
         .then(function(foundAssets) {
-          expect(foundAssets.length).to.equal(0)
+          expect(foundAssets.length).to.equal(0);
         })
-        .then(function() {
+        .then(function() { 
           done();
         })
-        .catch(function(error){
-          console.log(error);
-        });
-      })
-      .end(done);
+        .catch(done);
+      });
   });
 
   it('it should be invalid if there is no token', function(done) {
@@ -285,9 +278,7 @@ describe('GET /types/:id/assets', function() {
     .then(function() {
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   });
 
   it('responds with an array of assets if token is valid', function(done) {
@@ -340,9 +331,7 @@ describe('POST /types/:id/assets', function() {
       type = newType;
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   })
 
   it('creates a new asset of the given type if token is valid', function(done) {
@@ -414,10 +403,8 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
     .then(function() {
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
-  });
+    .catch(done);
+  })
 
   it('updates an asset of the given type if token is valid', function(done) {
     const token = login(user);
@@ -484,12 +471,10 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
     .then(function() {
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   })
 
-  it("deletes asset of a certain type and asset's descendants if token is valid", function(done) {
+  xit("deletes asset of a certain type and asset's descendants if token is valid", function(done) {
     const token = login(user);
     request(app)
       .delete(`/types/${type.id}/assets/${asset.id}`)
@@ -497,6 +482,8 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
       .expect(200)
       .expect(function(res, req) {
         expect(res.body).to.deep.equal({});
+      })
+      .end(function() {
         db.Type.findById(type.id)
         .then(function(foundType) {
           expect(foundType.assets.indexOf(asset.id)).to.equal(-1);
@@ -506,15 +493,10 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
         })
         .then(function(foundAsset) {
           expect(foundAsset).to.equal(null);
-        })
-        .then(function() {
           done();
         })
-        .catch(function(error){
-          console.log(error);
-        });
-      })
-      .end(done);
+        .catch(done)
+      });
   });
 
   it('it should be invalid if there is no token', function(done) {
