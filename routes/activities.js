@@ -16,9 +16,14 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:a_id', function(req, res) {
-  db.Stage.findById(req.params.a_id).populate('stages')
-  .then(function(stages){
-    res.send(stages);
+  db.Activity.findById(req.params.a_id).populate({
+    path:'stages',
+    populate: {
+      path: 'assets'
+    } 
+  })
+  .then(function(activity){
+    res.send(activity);
   })
   .catch(function(err){
     res.status(500).send(err);
