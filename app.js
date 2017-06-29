@@ -43,7 +43,6 @@ app.use('/types', loginRequired, typesRoutes);
 app.use('/assets/:a_id/childassets', loginRequired, assetRoutes);
 app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
 
-
 app.listen(PORT, function() {
   console.log("Server is listening");
 });
