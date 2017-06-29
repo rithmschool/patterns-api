@@ -2,7 +2,7 @@ let express = require("express");
 let router = express.Router({mergeParams: true});
 const jwt = require('jsonwebtoken');
 let db = require("../models");
-let ensureCorrectUser = require('./helpers').ensureCorrectUser_Activities;
+let ensureCorrectUser = require('./helpers').ensureCorrectUserActivities;
 
 router.get('/', function(req, res) {
   db.User.findById(req.params.u_id).populate('activities')
@@ -18,7 +18,6 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', ensureCorrectUser, function(req, res) {
-  console.log("UP HERE")
   let newActivity = new db.Activity(req.body);
   let user = null;
   const authHeader = req.headers['authorization'];
@@ -35,7 +34,6 @@ router.post('/', ensureCorrectUser, function(req, res) {
     })
     .then(function(foundUser) {
       newActivity.user = foundUser;
-      console.log("NEW",newActivity);
       return newActivity.save();
     })
     .then(function(newActivity) {

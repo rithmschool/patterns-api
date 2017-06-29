@@ -1,4 +1,3 @@
-require('dotenv').load();
 const jwt = require('jsonwebtoken');
 const db = require("../models");
 
@@ -21,7 +20,7 @@ function loginRequired(req, res, next){
   }
 }
 
-function ensureCorrectUser_Activities(req, res, next){
+function ensureCorrectUserActivities(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
     try {
@@ -43,7 +42,7 @@ function ensureCorrectUser_Activities(req, res, next){
   }
 }
 
-function ensureCorrectUser_Assets(req, res, next){
+function ensureCorrectUserAssets(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
     let token = authHeader.split(" ")[1];
@@ -81,7 +80,7 @@ function ensureCorrectUser_Assets(req, res, next){
   }
 }
 
-function ensureCorrectUser_Types(req, res, next){
+function ensureCorrectUserTypes(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
     let token = authHeader.split(" ")[1];
@@ -108,7 +107,7 @@ function ensureCorrectUser_Types(req, res, next){
 
 module.exports = { 
   loginRequired, 
-  ensureCorrectUser_Activities, 
-  ensureCorrectUser_Assets, 
-  ensureCorrectUser_Types 
+  ensureCorrectUserActivities, 
+  ensureCorrectUserAssets, 
+  ensureCorrectUserTypes 
 };

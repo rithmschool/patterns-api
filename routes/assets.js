@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router({mergeParams: true});
 const jwt = require('jsonwebtoken');
 const db = require("../models");
-const ensureCorrectUser = require('./helpers').ensureCorrectUser_Assets;
+const ensureCorrectUser = require('./helpers').ensureCorrectUserAssets;
 
 router.get('/', function(req, res) {
   db.Asset.findById(req.params.a_id).populate('assets')
@@ -41,7 +41,6 @@ router.post('/', function(req, res) {
       res.send(newAsset);
     })
     .catch(function(err){
-      console.log("ERROR", error)
       res.status(500).send(err);
     });
 });
