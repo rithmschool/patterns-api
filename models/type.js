@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const findOrCreate = require('mongoose-findorcreate');
+const Asset = require('./asset');
 const typeSchema = new mongoose.Schema({
   isAgent: {
     type: Boolean,
@@ -22,8 +23,13 @@ const typeSchema = new mongoose.Schema({
 
 typeSchema.pre('remove', function(next) {
   let type = this;
-  db.Asset.remove({typeId: type.id})
+  Asset.find({typeId: type.id})
   .then(function(foundAssets){
+    return Promise.all(foundAssets.map(function(asset) {
+      return asset.remove();
+    }));
+  })
+  .then(function() {
     next();
   })
   .catch(function(err){

@@ -58,10 +58,10 @@ router.patch('/:c_id', ensureCorrectUser, function(req, res) {
 router.delete('/:c_id', ensureCorrectUser, function(req, res) {
   db.Asset.findById(req.params.c_id)
   .then(function(target){
-    target.remove();
+    return target.remove();
   })
   .then(function() {
-    res.status(200).send({});
+    res.sendStatus(200);
   })
   .catch(function(err){
     res.status(500).send(err);

@@ -6,6 +6,7 @@ const testingData = require("../helpers").testingData;
 const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
 describe('GET /users/:u_id/activities/', function() {
@@ -40,7 +41,7 @@ describe('GET /users/:u_id/activities/', function() {
         return user.save();
       })
       .then(function(user) {
-        stage = new db.Stage({
+        return db.Stage.create({
           name: 'Research',
           activity: activity.id,
           createdBy: user.id
@@ -52,12 +53,11 @@ describe('GET /users/:u_id/activities/', function() {
         return activity.save()
       })
       .then(function(activity){
-        activity2 = new db.Activity({
+        return db.Activity.create({
           name: 'Job search August 2017',
           user: user.id,
           rootAssetType: asset.id
         });
-        return activity2.save();
       })
       .then(function(newActivity2){
         user.activities.push(newActivity2.id);
@@ -65,7 +65,7 @@ describe('GET /users/:u_id/activities/', function() {
         return user.save();
       })
       .then(function(user) {
-        stage2 = new db.Stage({
+        return db.Stage.create({
           name: 'Follow-up',
           activity: activity2.id,
           createdBy: user.id
@@ -74,14 +74,12 @@ describe('GET /users/:u_id/activities/', function() {
       })
       .then(function(stage2) {
         activity2.stages.push(stage2.id);
-        return activity2.save()
+        return activity2.save();
       })
       .then(function(){ 
         done();
       })
-      .catch(function(error){
-        console.log(error);
-      })
+      .catch(done)
   });
 
   it("responds with all of this user's activities if token is valid", function(done) { 
@@ -132,9 +130,7 @@ describe('POST /users/:u_id/activities', function() {
       asset = newAsset;
       done();
     })
-    .catch(function(error){
-      console.log(error);
-    });
+    .catch(done);
   })
 
   it('creates an activity for a user if token is valid', function(done) {
