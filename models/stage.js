@@ -15,7 +15,8 @@ const stageSchema = new mongoose.Schema({
   },
   activity: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Activity'
+    ref: 'Activity',
+    required: true
   },
   assets: [{
     type: mongoose.Schema.Types.ObjectId, 
@@ -23,7 +24,8 @@ const stageSchema = new mongoose.Schema({
   }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   }
 });
 

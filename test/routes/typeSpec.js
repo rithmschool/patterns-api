@@ -10,12 +10,21 @@ const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
 
 describe('GET /types', function() {
+  let user = null;
+  let type = null;
   before(function(done) {
-    db.Type.create({
-      isAgent: true,
-      name: 'Company'
+    db.User.create(testingData)
+    .then(function(newUser){
+      user = newUser;
+      type = new db.Type({
+        isAgent: true,
+        name: 'Company',
+        createdBy: user.id
+      });
+      return type.save();
     })
-    .then(function() {
+    .then(function(newType) {
+      type = newType;
       done();
     })
     .catch(function(error) {
@@ -45,16 +54,27 @@ describe('GET /types', function() {
   });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
 describe('POST /types', function() {
+  let user = null;
+  before(function(done) {
+    db.User.create(testingData)
+    .then(function(newUser){
+      user = newUser;
+      done();
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+  });
+
   it('creates a type if token is valid', function(done) { 
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .post('/types')
       .send({
@@ -80,10 +100,9 @@ describe('POST /types', function() {
   });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
@@ -97,7 +116,7 @@ describe('PATCH /types/:t_id', function() {
       let type = new db.Type({ 
         isAgent: false, 
         name: 'Corporation',
-        createdBy: user._id
+        createdBy: user.id
       })
       return type.save();
     })
@@ -147,13 +166,9 @@ describe('PATCH /types/:t_id', function() {
   });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      return db.User.remove({})
-    })
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
@@ -168,7 +183,7 @@ describe('DELETE /types/:t_id', function() {
       let type = new db.Type({
         isAgent: true,
         name: 'Employees',
-        createdBy: user._id
+        createdBy: user.id
       });
       return type.save();
     })
@@ -176,7 +191,8 @@ describe('DELETE /types/:t_id', function() {
       type = newType;
       return db.Asset.create({
         name: "Matt",
-        typeId: type.id
+        typeId: type.id,
+        createdBy: user.id
       });
     })
     .then(function(newAsset) {
@@ -233,32 +249,33 @@ describe('DELETE /types/:t_id', function() {
   });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      return db.Asset.remove({})
-    })
-    .then(function() {
-      return db.User.remove({})
-    })
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
 describe('GET /types/:id/assets', function() {
   let type = null;
+  let user = null;
   before(function(done) {
-    db.Type.create({ 
-      isAgent: false, 
-      name:'Brand'
+    db.User.create(testingData)
+    .then(function(newUser){
+      user = newUser;
+      type = new db.Type({ 
+        isAgent: false, 
+        name:'Brand',
+        createdBy: user.id
+      })
+      return type.save();
     })
     .then(function(newType) {
       type = newType;
       const asset = new db.Asset({
         name:'Google',
         url:'https://www.google.com/',
-        logo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2000px-Google_2015_logo.svg.png'
+        logo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2000px-Google_2015_logo.svg.png',
+        createdBy: user.id
       })
       asset.typeId = type.id;
       return asset.save()
@@ -301,22 +318,25 @@ describe('GET /types/:id/assets', function() {
   });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      return db.Asset.remove({})
-    })
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
 describe('POST /types/:id/assets', function() {
   let type = null;
+  let user = null;
   before(function(done) {
-    db.Type.create({ 
-      isAgent: false, 
-      name:'Conglomerate'
+    db.User.create(testingData)
+    .then(function(newUser){
+      user = newUser;
+      type = new db.Type({ 
+        isAgent: false, 
+        name: 'Conglomerate',
+        createdBy: user.id
+      });
+      return type.save();
     })
     .then(function(newType) {
       type = newType;
@@ -328,7 +348,7 @@ describe('POST /types/:id/assets', function() {
   })
 
   it('creates a new asset of the given type if token is valid', function(done) {
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .post(`/types/${type.id}/assets`)
       .send({
@@ -357,13 +377,9 @@ describe('POST /types/:id/assets', function() {
     });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      return db.Asset.remove({})
-    })
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
@@ -377,7 +393,8 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
       user = newUser;
       let type = new db.Type({ 
         isAgent: false, 
-        name: 'Corporation'
+        name: 'Corporation',
+        createdBy: user.id
       });
       return type.save();
     })
@@ -388,7 +405,7 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
         typeId: newType.id,
-        createdBy: user._id
+        createdBy: user.id
       });
     })
     .then(function(newAsset) {
@@ -430,16 +447,9 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
     });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      return db.Asset.remove({})
-    })
-    .then(function() {
-      return db.User.remove({})
-    })
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });
 
@@ -453,7 +463,8 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
       user = newUser;
       let type = new db.Type({ 
         isAgent: false, 
-        name: 'Corporation'
+        name: 'Corporation',
+        createdBy: user.id
       });
       return type.save();
     })
@@ -464,7 +475,7 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
         typeId: newType.id,
-        createdBy: user._id
+        createdBy: user.id
       });
     })
     .then(function(newAsset) {
@@ -517,15 +528,8 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
   });
 
   after(function(done) {
-    db.Type.remove({})
-    .then(function() {
-      return db.Asset.remove({})
-    })
-    .then(function() {
-      return db.User.remove({})
-    })
-    .then(function() {
+    mongoose.connection.db.dropDatabase(function() {
       done();
-    });
+    })
   });
 });

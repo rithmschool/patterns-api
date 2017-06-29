@@ -41,6 +41,7 @@ router.post('/', function(req, res) {
       res.send(newAsset);
     })
     .catch(function(err){
+      console.log("ERROR", error)
       res.status(500).send(err);
     });
 });

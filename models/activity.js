@@ -19,7 +19,13 @@ const activitySchema = new mongoose.Schema({
   }],
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
+  }, 
+  rootAssetType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Asset',
+    required: true
   }
 });
 

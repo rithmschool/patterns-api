@@ -20,7 +20,7 @@ function login(user){
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
-    mongoId: user._id
+    mongoId: user.id
   };
   return jwt.sign(payload, process.env.SECRET_KEY);
 }
