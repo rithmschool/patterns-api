@@ -1,6 +1,8 @@
-var express = require("express");
-var router = express.Router({mergeParams: true});
-var db = require("../models");
+const express = require("express");
+const router = express.Router({mergeParams: true});
+const jwt = require('jsonwebtoken');
+const db = require("../models");
+const ensureCorrectUser = require('./helpers').ensureCorrectUserAssets;
 
 router.get('/', function(req, res) {
   db.Asset.findById(req.params.a_id).populate('assets')
@@ -14,6 +16,13 @@ router.get('/', function(req, res) {
 
 router.post('/', function(req, res) {
   let newAsset = new db.Asset(req.body);
+  const authHeader = req.headers['authorization'];
+  if(authHeader) {
+    let token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+      newAsset.createdBy = decoded.mongoId;
+    });
+  }
   let parent = null;
   db.Asset.findById(req.params.a_id)
     .then(function(parentAsset) {
@@ -36,7 +45,7 @@ router.post('/', function(req, res) {
     });
 });
 
-router.patch('/:c_id', function(req, res) {
+router.patch('/:c_id', ensureCorrectUser, function(req, res) {
   db.Asset.findByIdAndUpdate(req.params.c_id, req.body, {new: true})
   .then(function(updatedAsset) {
     res.status(200).send(updatedAsset);
@@ -46,7 +55,7 @@ router.patch('/:c_id', function(req, res) {
   });
 });
 
-router.delete('/:c_id', function(req, res) {
+router.delete('/:c_id', ensureCorrectUser, function(req, res) {
   db.Asset.findById(req.params.c_id)
   .then(function(target){
     target.remove();

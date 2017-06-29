@@ -1,20 +1,20 @@
-var express = require("express");
-var app = express();
-var methodOverride = require("method-override");
-var bodyParser = require("body-parser");
-var passport = require("passport");
-var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-var cors = require("cors");
-var PORT = process.env.PORT || 3001;
+let express = require("express");
+let app = express();
+let methodOverride = require("method-override");
+let bodyParser = require("body-parser");
+let passport = require("passport");
+let GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+let cors = require("cors");
+let PORT = process.env.PORT || 3001;
 
-var authRoutes = require('./routes/auth');
-var typesRoutes = require('./routes/types');
-var assetRoutes = require('./routes/assets');
-var activitiesRoutes = require('./routes/activities');
-var loginRequired = require('./routes/helpers');
+let authRoutes = require('./routes/auth');
+let typesRoutes = require('./routes/types');
+let assetRoutes = require('./routes/assets');
+let activitiesRoutes = require('./routes/activities');
+let loginRequired = require('./routes/helpers').loginRequired;
 
 if (process.env.NODE_ENV !== 'production') {
-  var morgan = require("morgan");
+  let morgan = require("morgan");
   require("dotenv").config();
   app.use(morgan("tiny"));
 }
