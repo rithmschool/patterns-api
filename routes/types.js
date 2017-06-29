@@ -1,6 +1,6 @@
-var express = require("express");
-var router = express.Router();
-var db = require("../models");
+const express = require("express");
+const router = express.Router();
+const db = require("../models");
 
 router.get('/', function(req, res) {
   db.Type.find()
@@ -12,8 +12,41 @@ router.get('/', function(req, res) {
     });
 });
 
-router.get('/:id/assets', function(req, res) {
-  db.Type.findById(req.params.id).populate('assets')
+router.post('/', function(req, res) {
+  db.Type.create(req.body)
+    .then(function(newType) {
+      res.send(newType);
+    })
+    .catch(function(err) {
+      res.status(500).send(err);
+    });
+});
+
+router.patch('/:t_id', function(req, res) {
+  db.Type.findByIdAndUpdate(req.params.t_id, req.body, {new: true})
+  .then(function(updatedType) {
+    res.status(200).send(updatedType);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+});
+
+router.delete('/:t_id', function(req, res) {
+  db.Type.findById(req.params.t_id)
+  .then(function(foundType) {
+    foundType.remove();
+  })
+  .then(function(){
+    res.send(200);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+})
+
+router.get('/:t_id/assets', function(req, res) {
+  db.Type.findById(req.params.t_id).populate('assets')
   .then(function(type){
     res.send(type);
   })
@@ -22,11 +55,11 @@ router.get('/:id/assets', function(req, res) {
   });
 });
 
-router.post('/:id/assets', function(req, res) {
-  var newAsset = new db.Asset(req.body);
-  var type;
-  newAsset.typeId = req.params.id;
-  db.Type.findById(req.params.id)
+router.post('/:t_id/assets', function(req, res) {
+  let newAsset = new db.Asset(req.body);
+  let type = null;
+  newAsset.typeId = req.params.t_id;
+  db.Type.findById(req.params.t_id)
     .then(function(foundType) {
       type = foundType;
       return newAsset.save();
@@ -41,6 +74,29 @@ router.post('/:id/assets', function(req, res) {
     .catch(function(err){
       res.status(500).send(err);
     });
+});
+
+router.patch('/:t_id/assets/:a_id', function(req, res) {
+  db.Asset.findByIdAndUpdate(req.params.a_id, req.body, {new: true})
+  .then(function(updatedAsset) {
+    res.status(200).send(updatedAsset);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+});
+
+router.delete('/:t_id/assets/:a_id', function(req, res) {
+  db.Asset.findById(req.params.a_id)
+  .then(function(foundAsset){
+    foundAsset.remove();
+  })
+  .then(function(){
+    res.send(200);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
 });
 
 module.exports = router;

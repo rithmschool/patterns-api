@@ -28,6 +28,29 @@ router.get('/:a_id', function(req, res) {
   .catch(function(err){
     res.status(500).send(err);
   });
+
+router.post('/', function(req, res) {
+  let newActivity = new db.Activity(req.body);
+  let user = null;
+  db.User.findById(req.params.u_id)
+    .then(function(foundUser) {
+      user = foundUser;
+      return user.save();
+    })
+    .then(function(foundUser) {
+      newActivity.user = foundUser;
+      return newActivity.save();
+    })
+    .then(function(newActivity) {
+      user.activities.push(newActivity.id);
+      return user.save();
+    })
+    .then(function() {
+      res.send(newActivity);
+    })
+    .catch(function(err){
+      res.status(500).send(err);
+    });
 });
 
 module.exports = router;
