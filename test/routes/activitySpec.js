@@ -15,13 +15,24 @@ describe('GET /users/:u_id/activities/', function() {
   let stage2 = null;
   let user = null;
   let asset = null;
+  let type = null;
   before(function(done) {
     db.User.create(testingData)
       .then(function(newUser){
         user = newUser;
-        asset = new db.Asset({
+        type = new db.Type({
           name: "Company",
+          isAgent: true,
           createdBy: user.id
+        });
+        return type.save();
+      })
+      .then(function(newType){
+        type = newType;
+        asset = new db.Asset({
+          name: "Google",
+          createdBy: user.id,
+          typeId: type.id
         });
         return asset.save();
       })
@@ -115,13 +126,24 @@ describe('GET /users/:u_id/activities/', function() {
 describe('POST /users/:u_id/activities', function() {
   let user = null;
   let asset = null;
+  let type = null;
   before(function(done) {
     db.User.create(testingData)
-    .then(function(foundUser) {
-      user = foundUser;
+    .then(function(newUser){
+      user = newUser;
+      type = new db.Type({
+        name: "Company",
+        isAgent: true,
+        createdBy: user.id
+      });
+      return type.save();
+      })
+    .then(function(newType) {
+      type = newType;
       let newAsset = new db.Asset({
         name: "Microsoft",
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       })
       return newAsset.save();
     })

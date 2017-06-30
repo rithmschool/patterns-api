@@ -26,7 +26,7 @@ function ensureCorrectUserActivities(req, res, next){
     try {
       let token = authHeader.split(" ")[1];
       jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        if(decoded.mongoId === req.params.u_id) {
+        if(!err && decoded.mongoId === req.params.u_id) {
           next();
         } else {
           res.status(401).send({
@@ -46,37 +46,37 @@ function ensureCorrectUserAssets(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
     let token = authHeader.split(" ")[1];
-    try {
-      jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        if(req.params.c_id) {
-          db.Asset.findById(req.params.c_id)
-          .then(function(foundAsset) {
-            if(decoded.mongoId === foundAsset.createdBy.toString()) {
-              next();
-            } else {
-              res.status(401).send({
-                message: "Unauthorized"
-              });
-            }
-          });
-        } else if (req.params.a_id) {
-          db.Asset.findById(req.params.a_id)
-          .then(function(foundAsset) {
-            if(decoded.mongoId === foundAsset.createdBy.toString()) {
-              next();
-            } else {
-              res.status(401).send({
-                message: "Unauthorized"
-              });
-            }
-          });
-        }
-      });
-    } catch(e) {
-      res.status(401).send({
-        message: "Unauthorized"
-      });
-    }
+    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+      if(req.params.c_id) {
+        db.Asset.findById(req.params.c_id)
+        .then(function(foundAsset) {
+          if(!err && decoded.mongoId === foundAsset.createdBy.toString()) {
+            next();
+          } else {
+            throw "Error"
+          }
+        })
+        .catch(function() {
+          res.status(401).send({
+            message: "Unauthorized"
+          })
+        });
+      } else if (req.params.a_id) {
+        db.Asset.findById(req.params.a_id)
+        .then(function(foundAsset) {
+          if(!err && decoded.mongoId === foundAsset.createdBy.toString()) {
+            next();
+          } else {
+            throw "Error"
+          }
+        })
+        .catch(function() {
+          res.status(401).send({
+            message: "Unauthorized"
+          })
+        });
+      }
+    });
   }
 }
 
@@ -84,24 +84,21 @@ function ensureCorrectUserTypes(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
     let token = authHeader.split(" ")[1];
-    try {
-      jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        db.Type.findById(req.params.t_id)
-        .then(function(foundType) {
-          if(decoded.mongoId === foundType.createdBy.toString()) {
-            next();
-          } else {
-            res.status(401).send({
-              message: "Unauthorized"
-            });
-          }
-        });
-      });
-    } catch(e) {
-      res.status(401).send({
-        message: "Unauthorized"
-      });
-    }
+    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+      db.Type.findById(req.params.t_id)
+      .then(function(foundType) {
+        if(!err && decoded.mongoId === foundType.createdBy.toString()) {
+          next();
+        } else {
+          throw "Error"
+        }
+      })
+      .catch(function() {
+        res.status(401).send({
+          message: "Unauthorized"
+        })
+      })
+    });
   }
 }
 

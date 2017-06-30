@@ -201,7 +201,25 @@ describe('DELETE /types/:t_id', function() {
     .catch(done);
   });
 
-  xit('deletes a type and all assets of that type if token is valid', function(done) { 
+  it('it should be invalid if there is no token', function(done) {
+    request(app)
+      .delete(`/types/${type.id}`)
+      .expect(401, {
+        message: "You must be logged in to continue."
+      }, done);
+  });
+
+  it("it should be unauthorized if attempted by another user", function(done) {
+    const token2 = login(testingData2);
+    request(app)
+      .delete(`/types/${type.id}`)
+      .set('authorization', 'Bearer: ' + token2)
+      .expect(401, {
+        message: "Unauthorized"
+      }, done);
+  });
+
+  it('deletes a type and all assets of that type if token is valid', function(done) { 
     const token = login(user);
     request(app)
       .delete(`/types/${type.id}`)
@@ -219,24 +237,6 @@ describe('DELETE /types/:t_id', function() {
         })
         .catch(done);
       });
-  });
-
-  it('it should be invalid if there is no token', function(done) {
-    request(app)
-      .delete(`/types/${type.id}`)
-      .expect(401, {
-        message: "You must be logged in to continue."
-      }, done);
-  });
-
-  it("it should be unauthorized if attempted by another user", function(done) {
-    const token2 = login(testingData2);
-    request(app)
-      .patch(`/types/${type.id}`)
-      .set('authorization', 'Bearer: ' + token2)
-      .expect(401, {
-        message: "Unauthorized"
-      }, done);
   });
 
   after(function(done) {
@@ -459,7 +459,7 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
         name: 'Microsoft',
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        typeId: newType.id,
+        typeId: type.id,
         createdBy: user.id
       });
     })
@@ -474,7 +474,7 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
     .catch(done);
   })
 
-  xit("deletes asset of a certain type and asset's descendants if token is valid", function(done) {
+  it("deletes asset of a certain type and asset's descendants if token is valid", function(done) {
     const token = login(user);
     request(app)
       .delete(`/types/${type.id}/assets/${asset.id}`)
@@ -489,10 +489,10 @@ describe('DELETE /types/:t_id/assets/:a_id', function() {
           expect(foundType.assets.indexOf(asset.id)).to.equal(-1);
         })
         .then(function(){
-          db.Asset.findOne(asset);
+          return db.Asset.findOne(asset);
         })
         .then(function(foundAsset) {
-          expect(foundAsset).to.equal(null);
+          expect(foundAsset).to.be.null;
           done();
         })
         .catch(done)
