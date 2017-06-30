@@ -23,22 +23,16 @@ function loginRequired(req, res, next){
 function ensureCorrectUserActivities(req, res, next){
   const authHeader = req.headers['authorization'];
   if(authHeader) {
-    try {
-      let token = authHeader.split(" ")[1];
-      jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-        if(!err && decoded.mongoId === req.params.u_id) {
-          next();
-        } else {
-          res.status(401).send({
-            message: "Unauthorized"
-          });
-        }
-      });
-    } catch(e) {
-      res.status(401).send({
-        message: "Unauthorized"
-      });
-    }
+    let token = authHeader.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
+      if(decoded.mongoId === req.params.u_id) {
+        next();
+      } else {
+        res.status(401).send({
+          message: "Unauthorized"
+        });
+      }
+    });
   }
 }
 
