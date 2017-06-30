@@ -8,27 +8,39 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
-xdescribe('GET /assets/:a_id/childassets', function() {
+describe('GET /assets/:a_id/childassets', function() {
   let asset = null;
   let child = null;
   let user = null;
+  let type = null;
   before(function(done) {
     db.User.create(testingData)
     .then(function(newUser){
-      user = newUser;
+        user = newUser;
+        type = new db.Type({
+          name: "Company",
+          isAgent: true,
+          createdBy: user.id
+        });
+        return type.save();
+      })
+    .then(function(newType){
+      type = newType;
       asset = new db.Asset({
         name:'Facebook',
         url:'https://www.facebook.com/',
         logo:'https://facebookbrand.com/wp-content/themes/fb-branding/prj-fb-branding/assets/images/fb-art.png',
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       });
       return asset.save();
     })
     .then(function(newAsset) {
       asset = newAsset;
       child = new db.Asset({
-        name:'Funding',
-        createdBy: user.id
+        name: 'Funding',
+        createdBy: user.id,
+        typeId: type.id
       })
       return child.save()
     })
@@ -65,18 +77,29 @@ xdescribe('GET /assets/:a_id/childassets', function() {
   });
 });
 
-xdescribe('POST /assets/:a_id/childassets', function() {
+describe('POST /assets/:a_id/childassets', function() {
   let parent = null;
   let user = null;
+  let type = null;
   before(function(done) {
     db.User.create(testingData)
     .then(function(newUser){
       user = newUser;
+      type = new db.Type({
+        name: "Company",
+        isAgent: true,
+        createdBy: user.id
+      });
+      return type.save();
+    })
+    .then(function(newType){
+      type = newType;
       parent = new db.Asset({
         name:'Facebook',
         url:'https://www.facebook.com/',
         logo:'https://facebookbrand.com/wp-content/themes/fb-branding/prj-fb-branding/assets/images/fb-art.png',
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       });
       return parent.save();
     })
@@ -92,7 +115,8 @@ xdescribe('POST /assets/:a_id/childassets', function() {
     request(app)
       .post(`/assets/${parent.id}/childassets`)
       .send({
-        name: 'Brand'
+        name: 'Brand',
+        typeId: type.id
       })
       .set('authorization', 'Bearer: ' + token)
       .expect(200)
@@ -120,19 +144,30 @@ xdescribe('POST /assets/:a_id/childassets', function() {
   });
 });
 
-xdescribe('PATCH /assets/:a_id/childassets/:c_id', function() {
+describe('PATCH /assets/:a_id/childassets/:c_id', function() {
   let child = null;
   let parent = null;
   let user = null;
+  let type = null;
   before(function(done) {
     db.User.create(testingData)
-    .then(function(newUser) {
+    .then(function(newUser){
       user = newUser;
+      type = new db.Type({
+        name: "Company",
+        isAgent: true,
+        createdBy: user.id
+      });
+      return type.save();
+    })
+    .then(function(newType) {
+      type = newType;
       let asset = new db.Asset({
         name: 'Microsoft',
         url: 'https://www.microsoft.com/en-us/',
         logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       });
       return asset.save();
     })
@@ -140,11 +175,12 @@ xdescribe('PATCH /assets/:a_id/childassets/:c_id', function() {
       parent = parentAsset;
     })
     .then(function() {
-      return db.Asset.create({
+      child = new db.Asset({
         name: 'Brand',
         url: 'www.brand.com',
         parent: parent.id,
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       })
       return child.save()
     })
@@ -164,7 +200,8 @@ xdescribe('PATCH /assets/:a_id/childassets/:c_id', function() {
     request(app)
       .patch(`/assets/${parent.id}/childassets/${child.id}`)
       .send({
-        name: 'Employees'
+        name: 'Employees',
+        typeId: type.id
       })
       .set('authorization', 'Bearer: ' + token)
       .expect(200)
@@ -204,7 +241,7 @@ xdescribe('PATCH /assets/:a_id/childassets/:c_id', function() {
   });
 });
 
-xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
+describe('DELETE /assets/:a_id/childassets/:c_id', function() {
   let parent = null; // Microsoft
   let child = null; // Brand (target)
   let grandchild = null; // Logo
@@ -216,7 +253,8 @@ xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
       user = newUser;
       let type = new db.Type({
         isAgent: true,
-        name: 'Company'
+        name: 'Company',
+        createdBy: user.id
       })
       return type.save();
     })
@@ -234,10 +272,11 @@ xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
       parent = parentAsset;
     })
     .then(function() {
-      return db.Asset.create({
+      child = new db.Asset({
         name: 'Brand',
         parent: parent.id,
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       })
       return child.save()
     })
@@ -247,10 +286,11 @@ xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
       return parent.save()
     })
     .then(function(parent) {
-      return db.Asset.create({
+      grandchild = new db.Asset({
         name: 'Logo',
         parent: child.id,
-        createdBy: user.id
+        createdBy: user.id,
+        typeId: type.id
       })
       return grandchild.save()
     })
@@ -263,6 +303,24 @@ xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
       done();
     })
     .catch(done);
+  });
+
+  it('it should be invalid if there is no token', function(done) {
+    request(app)
+      .delete(`/assets/${parent.id}/childassets/${child.id}`)
+      .expect(401, {
+        message: "You must be logged in to continue."
+      }, done);
+  });
+
+  it("it should be unauthorized if attempted by another user", function(done) {
+    const token2 = login(testingData2);
+    request(app)
+      .delete(`/assets/${parent.id}/childassets/${child.id}`)
+      .set('authorization', 'Bearer: ' + token2)
+      .expect(401, {
+        message: "Unauthorized"
+      }, done);
   });
 
   it("deletes target, target from parent's assets array, and target's descendants if token is valid", function(done) {
@@ -288,24 +346,6 @@ xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
         })
         .catch(done);
       })
-    });
-
-    it('it should be invalid if there is no token', function(done) {
-      request(app)
-        .delete(`/assets/${parent.id}/childassets/${child.id}`)
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
-    });
-
-    it("it should be unauthorized if attempted by another user", function(done) {
-      const token2 = login(testingData2);
-      request(app)
-        .delete(`/assets/${parent.id}/childassets/${child.id}`)
-        .set('authorization', 'Bearer: ' + token2)
-        .expect(401, {
-          message: "Unauthorized"
-        }, done);
     });
 
   after(function(done) {

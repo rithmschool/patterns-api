@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Type = require("./type");
+// const Type = require("./type");
 const findOrCreate = require('mongoose-findorcreate');
 const assetSchema = new mongoose.Schema({
   name: {
@@ -55,7 +55,7 @@ assetSchema.pre('remove', function(next) {
   })
   .then(function() {
     // remove target from array of assets of same type
-    return Type.find(({typeId: target.id}))
+    return mongoose.model('Type').findById(target.typeId);
   })
   .then(function(type) {
     let foundIdx = type.assets.indexOf(target.id);

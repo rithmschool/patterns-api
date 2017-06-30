@@ -107,7 +107,7 @@ router.patch('/:t_id/assets/:a_id', ensureCorrectUserAssets, function(req, res) 
 router.delete('/:t_id/assets/:a_id', ensureCorrectUserAssets, function(req, res) {
   db.Asset.findById(req.params.a_id)
   .then(function(foundAsset){
-    foundAsset.remove();
+    return foundAsset.remove();
   })
   .then(function(){
     res.sendStatus(200);
