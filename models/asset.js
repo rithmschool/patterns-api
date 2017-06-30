@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const Type = require("./type");
 const findOrCreate = require('mongoose-findorcreate');
 const assetSchema = new mongoose.Schema({
   name: {
