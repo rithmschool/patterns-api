@@ -34,7 +34,7 @@ router.post('/', ensureCorrectUser, function(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader.split(" ")[1];
   const payload = jwt.decode(token);
-  newActivity.createdBy = decoded.mongoId;
+  newActivity.createdBy = payload.mongoId;
   newActivity.save().then(function() {
     res.send(newActivity);
   })

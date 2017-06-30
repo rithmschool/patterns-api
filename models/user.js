@@ -18,8 +18,7 @@ const userSchema = new mongoose.Schema({
   }]
 });
 
-userSchema.pre('save', function(next) {
-  let user = this;
+userSchema.post('save', function(user, next) {
   let type = null;
   let activity = null;
   let stages = null;
@@ -40,7 +39,7 @@ userSchema.pre('save', function(next) {
       type = foundType;
       return mongoose.model('Activity').create({
         name: "Job Search",
-        user: user.id,
+        createdBy: user.id,
         rootAssetType: type.id
       });
     })

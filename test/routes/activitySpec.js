@@ -17,10 +17,10 @@ describe('Activities routes', function() {
   let companyType = null;
   before(function(done) {
     setup().then(function() {
-      return db.User.find();
+      return db.User.findOne({firstName: "Bob"});
     })
-    .then(function(users) {
-      user = users.find(user => user.firstName === "Bob");
+    .then(function(bob) {
+      user = bob;
       token = login(user);
       return db.Type.findOne({name: "Company"})
     }).then(function(type) {
