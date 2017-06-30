@@ -24,7 +24,7 @@ router.post('/google/callback',
     let activity = null;
     let stages = null;
     let token = null;
-    let newUser = null;
+    let newUser = false;
     axios({
       method: 'post',
       url: 'https://www.googleapis.com/oauth2/v4/token',
@@ -59,78 +59,7 @@ router.post('/google/callback',
         mongoId: currentUser._id
       };
       token = jwt.sign(payload, process.env.SECRET_KEY);
-      return currentUser;
-    })
-    .then(function(currentUser){
-      user = currentUser.doc;
-      return db.Type.count({name: "Company"});
-    })
-    .then(function(count){
-      if (count === 0) { 
-        newUser = true;
-        type = new db.Type({
-          isAgent: true,
-          name: "Company",
-          createdBy: user.id
-        });
-        return type.save();
-      } else {
-        newUser = false;
-        return db.Type.findOne({name: "Company"});
-      }
-    })
-    .then(function(newType){
-      type = newType;
-      userId = type.createdBy;
-      if (newUser) {
-        activity = new db.Activity({
-          name: "Job Search",
-          user: userId,
-          rootAssetType: type.id
-        });
-        return activity.save();
-      } else {
-        return null;
-      }
-    })
-    .then(function(newActivity){
-      if (newUser) {
-        activity = newActivity;
-        userId = activity.user;
-        return db.Stage.create([
-          {
-            name: "Research",
-            activity: activity.id,
-            createdBy: userId
-          },{
-            name: "Apply",
-            activity: activity.id,
-            createdBy: userId
-          },{
-            name: "Follow Up",
-            activity: activity.id,
-            createdBy: userId
-          }
-          ]);
-      } else {
-        return null;
-      }
-    })
-    .then(function(stages){
-      if (newUser) {
-        activity.stages.push(...stages);
-        return activity.save();
-      } else {
-        return null;
-      }
-    })
-    .then(function(activity){
-      if (newUser) {
-        user.activities.push(activity);
-        return user.save();
-      } else {
-        return null;
-      }  
+      return null;
     })
     .then(function(){
       response.status(200).send(token);

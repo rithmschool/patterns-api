@@ -1,8 +1,8 @@
-let express = require("express");
-let router = express.Router({mergeParams: true});
+const express = require("express");
+const router = express.Router({mergeParams: true});
 const jwt = require('jsonwebtoken');
-let db = require("../models");
-let ensureCorrectUser = require('./helpers').ensureCorrectUserActivities;
+const db = require("../models");
+const ensureCorrectUser = require('./helpers').ensureCorrectUser;
 
 router.get('/', function(req, res) {
   db.User.findById(req.params.u_id).populate('activities')
