@@ -24,6 +24,7 @@ router.post('/google/callback',
     let activity = null;
     let stages = null;
     let token = null;
+    let newUser = null;
     axios({
       method: 'post',
       url: 'https://www.googleapis.com/oauth2/v4/token',
@@ -65,7 +66,8 @@ router.post('/google/callback',
       return db.Type.count({name: "Company"});
     })
     .then(function(count){
-      if (count === 0) { // FIX THIS!!!!
+      if (count === 0) { 
+        newUser = true;
         type = new db.Type({
           isAgent: true,
           name: "Company",
@@ -73,46 +75,63 @@ router.post('/google/callback',
         });
         type.save();
       } else {
-        type = db.Type.find({name: "Company"});
+        newUser = false;
+        type = db.Type.findOne({name: "Company"});
       }
       return type;
     })
     .then(function(newType){
       type = newType;
       userId = type.createdBy;
-      activity = new db.Activity({
-        name: "Job Search",
-        user: userId,
-        rootAssetType: type.id
-      });
-      return activity.save();
+      if (newUser) {
+        activity = new db.Activity({
+          name: "Job Search",
+          user: userId,
+          rootAssetType: type.id
+        });
+        return activity.save();
+      } else {
+        return null;
+      }
     })
     .then(function(newActivity){
-      activity = newActivity;
-      userId = activity.user;
-      return db.Stage.create([
-      {
-        name: "Research",
-        activity: activity.id,
-        createdBy: userId
-      },{
-        name: "Apply",
-        activity: activity.id,
-        createdBy: userId
-      },{
-        name: "Follow Up",
-        activity: activity.id,
-        createdBy: userId
+      if (newUser) {
+        activity = newActivity;
+        userId = activity.user;
+        return db.Stage.create([
+        {
+          name: "Research",
+          activity: activity.id,
+          createdBy: userId
+        },{
+          name: "Apply",
+          activity: activity.id,
+          createdBy: userId
+        },{
+          name: "Follow Up",
+          activity: activity.id,
+          createdBy: userId
+        }
+        ]);
+      } else {
+        return null;
       }
-      ]);
     })
     .then(function(stages){
-      activity.stages.push(...stages);
-      return activity.save();
+      if (newUser) {
+        activity.stages.push(...stages);
+        return activity.save();
+      } else {
+        return null;
+      }
     })
     .then(function(activity){
-      user.activities.push(activity);
-      return user.save();
+      if (newUser) {
+        user.activities.push(activity);
+        return user.save();
+      } else {
+        return null;
+      }  
     })
     .then(function(){
       response.status(200).send(token);
