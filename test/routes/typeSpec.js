@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
-describe('GET /types', function() {
+xdescribe('GET /types', function() {
   let user = null;
   let type = null;
   before(function(done) {
@@ -57,7 +57,7 @@ describe('GET /types', function() {
   });
 });
 
-describe('POST /types', function() {
+xdescribe('POST /types', function() {
   let user = null;
   before(function(done) {
     db.User.create(testingData)
@@ -103,7 +103,7 @@ describe('POST /types', function() {
   });
 });
 
-describe('PATCH /types/:t_id', function() {
+xdescribe('PATCH /types/:t_id', function() {
   let type = null;
   let user = null;
   before(function(done) {
@@ -167,7 +167,7 @@ describe('PATCH /types/:t_id', function() {
   });
 });
 
-describe('DELETE /types/:t_id', function() {
+xdescribe('DELETE /types/:t_id', function() {
   let type = null;
   let asset = null;
   let user = null;
@@ -246,7 +246,7 @@ describe('DELETE /types/:t_id', function() {
   });
 });
 
-describe('GET /types/:id/assets', function() {
+xdescribe('GET /types/:id/assets', function() {
   let type = null;
   let user = null;
   before(function(done) {
@@ -313,7 +313,7 @@ describe('GET /types/:id/assets', function() {
   });
 });
 
-describe('POST /types/:id/assets', function() {
+xdescribe('POST /types/:id/assets', function() {
   let type = null;
   let user = null;
   before(function(done) {
@@ -370,7 +370,7 @@ describe('POST /types/:id/assets', function() {
   });
 });
 
-describe('PATCH /types/:t_id/assets/:a_id', function() {
+xdescribe('PATCH /types/:t_id/assets/:a_id', function() {
   let type = null;
   let asset = null;
   let user = null;
@@ -438,7 +438,7 @@ describe('PATCH /types/:t_id/assets/:a_id', function() {
   });
 });
 
-describe('DELETE /types/:t_id/assets/:a_id', function() {
+xdescribe('DELETE /types/:t_id/assets/:a_id', function() {
   let asset = null; // Microsoft
   let type = null; // Corporation
   let user = null;
