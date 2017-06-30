@@ -5,13 +5,13 @@ const db = require("../models");
 const ensureCorrectUser = require('./helpers').ensureCorrectUser;
 
 router.get('/', function(req, res) {
-    db.Activity.find({createdBy: req.params.u_id}).populate('stages')
-    .then(function(activities){
-      res.send(activities);
-    })
-    .catch(function(err){
-      res.status(500).send(err);
-    });
+  db.Activity.find({createdBy: req.params.u_id}).populate('stages')
+  .then(function(activities){
+    res.send(activities);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
 });
 
 router.get('/:a_id', function(req, res) {

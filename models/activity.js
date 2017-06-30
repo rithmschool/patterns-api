@@ -30,17 +30,22 @@ const activitySchema = new mongoose.Schema({
   }
 });
 
-activitySchema.post('save', function(activity, next) {
-  User.findById(activity.createdBy).then(function(user) {
-    user.activities.push(activity.id);
-    return user.save();
-  })
-  .then(function() {
+activitySchema.pre('save', function(next) {
+  let activity = this;
+  if (activity.isNew) {
+    User.findById(activity.createdBy).then(function(user) {
+      user.activities.push(activity.id);
+      return user.save();
+    })
+    .then(function() {
+      next();
+    })
+    .catch(function(error) {
+      next(error);
+    });
+  } else {
     next();
-  })
-  .catch(function(error) {
-    next(error);
-  });
+  }
 });
 
 activitySchema.plugin(findOrCreate);

@@ -65,7 +65,7 @@ describe('Activities routes', function() {
 
   });
 
-  describe('POST /users/:u_id/activities', function() {
+  xdescribe('POST /users/:u_id/activities', function() {
   
     it('creates an activity for a user if token is valid', function(done) {
       request(app)
