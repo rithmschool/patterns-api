@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const findOrCreate = require('mongoose-findorcreate');
-const Activity = require('./activity');
 const stageSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -33,7 +32,8 @@ const stageSchema = new mongoose.Schema({
 stageSchema.pre('save', function(next) {
   let stage = this;
   if (stage.isNew) {
-    Activity.findById(stage.activity).then(function(activity) {
+    mongoose.model('Activity').findById(stage.activity)
+    .then(function(activity) {
       activity.stages.push(stage.id);
       return activity.save();
     })

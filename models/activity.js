@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const findOrCreate = require('mongoose-findorcreate');
-const User = require("./user");
 const activitySchema = new mongoose.Schema({
   name: {
     type: String,
@@ -33,7 +32,8 @@ const activitySchema = new mongoose.Schema({
 activitySchema.pre('save', function(next) {
   let activity = this;
   if (activity.isNew) {
-    User.findById(activity.createdBy).then(function(user) {
+    mongoose.model('User').findById(activity.createdBy)
+    .then(function(user) {
       user.activities.push(activity.id);
       return user.save();
     })
