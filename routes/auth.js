@@ -19,10 +19,6 @@ router.get('/google',
 
 router.post('/google/callback',
   function(request, response) {
-    let user = null;
-    let type = null;
-    let activity = null;
-    let stages = null;
     let token = null;
     axios({
       method: 'post',
@@ -50,12 +46,13 @@ router.post('/google/callback',
       });
     })
     .then(function(currentUser) {
+      let user = currentUser.doc;
       const payload = {
-        googleId: currentUser.googleId,
-        firstName: currentUser.firstName,
-        lastName: currentUser.lastName,
-        email: currentUser.email,
-        mongoId: currentUser._id
+        googleId: user.googleId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        mongoId: user._id
       };
       token = jwt.sign(payload, process.env.SECRET_KEY);
       return null;
