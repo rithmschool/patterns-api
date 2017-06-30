@@ -6,7 +6,6 @@ const testingData = require("../helpers").testingData;
 const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
 describe('GET /users/:u_id/activities/', function() {

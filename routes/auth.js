@@ -1,11 +1,11 @@
-var express = require("express");
-var router = express.Router();
-var jwt = require('jsonwebtoken');
-var passport = require("passport");
-var db = require("../models");
-var cors = require("cors");
-var axios = require('axios');
-var qs = require("qs");
+let express = require("express");
+let router = express.Router();
+let jwt = require('jsonwebtoken');
+let passport = require("passport");
+let db = require("../models");
+let cors = require("cors");
+let axios = require('axios');
+let qs = require("qs");
 
 router.get('/google',
   passport.authenticate('google', {
@@ -19,6 +19,11 @@ router.get('/google',
 
 router.post('/google/callback',
   function(request, response) {
+    let user = null;
+    let type = null;
+    let activity = null;
+    let stages = null;
+    let token = null;
     axios({
       method: 'post',
       url: 'https://www.googleapis.com/oauth2/v4/token',
@@ -37,26 +42,83 @@ router.post('/google/callback',
       return axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${res.data.access_token}`);
     })
     .then(function(res){
-      db.User.findOrCreate({ 
+      return db.User.findOrCreate({ 
         googleId: res.data.id, 
         firstName: res.data.given_name, 
         lastName: res.data.family_name,
         email:res.data.email 
-      }, 
-      function (err, user) {
-        if (err) { return done(err); }
-        const payload = {
-          googleId: user.googleId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          mongoId: user._id
-        };
-        const token = jwt.sign(payload, process.env.SECRET_KEY);
-        response.status(200).send(token);
       });
     })
+    .then(function(currentUser) {
+      const payload = {
+        googleId: currentUser.googleId,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        mongoId: currentUser._id
+      };
+      token = jwt.sign(payload, process.env.SECRET_KEY);
+      return currentUser;
+    })
+    .then(function(currentUser){
+      user = currentUser.doc;
+      return db.Type.count({name: "Company"});
+    })
+    .then(function(count){
+      if (count === 0) { // FIX THIS!!!!
+        type = new db.Type({
+          isAgent: true,
+          name: "Company",
+          createdBy: user.id
+        });
+        type.save();
+      } else {
+        type = db.Type.find({name: "Company"});
+      }
+      return type;
+    })
+    .then(function(newType){
+      type = newType;
+      userId = type.createdBy;
+      activity = new db.Activity({
+        name: "Job Search",
+        user: userId,
+        rootAssetType: type.id
+      });
+      return activity.save();
+    })
+    .then(function(newActivity){
+      activity = newActivity;
+      userId = activity.user;
+      return db.Stage.create([
+      {
+        name: "Research",
+        activity: activity.id,
+        createdBy: userId
+      },{
+        name: "Apply",
+        activity: activity.id,
+        createdBy: userId
+      },{
+        name: "Follow Up",
+        activity: activity.id,
+        createdBy: userId
+      }
+      ]);
+    })
+    .then(function(stages){
+      activity.stages.push(...stages);
+      return activity.save();
+    })
+    .then(function(activity){
+      user.activities.push(activity);
+      return user.save();
+    })
+    .then(function(){
+      response.status(200).send(token);
+    })
     .catch(function(error) {
+      console.log("ERR", error);
       response.status(500).send(error);
     });
   }

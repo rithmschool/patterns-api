@@ -219,6 +219,7 @@ xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
         name: 'Company'
       })
       return type.save();
+    })
     .then(function(newType) {
       type = newType;
       return db.Asset.create({
