@@ -93,17 +93,17 @@ describe('GET /users/:u_id/activities/', function() {
   });
 
   it("responds with all of this user's activities if token is valid", function(done) { 
-    const token = login(testingData);
+    const token = login(user);
     request(app)
       .get(`/users/${activity.user}/activities/`)
       .set('authorization', 'Bearer: ' + token)
       .expect(200)
       .expect(function(res) {
-        expect(res.body[0].name).to.equal('Job search June 2017');
-        expect(res.body[1].name).to.equal('Job search August 2017');
-        expect(res.body[0].stages.length).to.equal(1);
-        expect(res.body[0].stages[0].name).to.equal('Research');
-        expect(res.body[1].stages[0].name).to.equal('Follow-up');
+        expect(res.body[1].name).to.equal('Job search June 2017');
+        expect(res.body[2].name).to.equal('Job search August 2017');
+        expect(res.body[1].stages.length).to.equal(1);
+        expect(res.body[1].stages[0].name).to.equal('Research');
+        expect(res.body[2].stages[0].name).to.equal('Follow-up');
       })
       .end(done);
   });
