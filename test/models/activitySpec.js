@@ -5,7 +5,7 @@ const teardown = require('../seed').teardown;
 
 describe('Activity model', function() {
 
-  describe('Basic Validations', function() {
+  describe('Basic validations', function() {
 
     it('should be invalid if activity name is empty', function(done) {
       var a = new db.Activity();
@@ -48,7 +48,8 @@ describe('Activity model', function() {
   describe('Pre-save hook', function() {
 
     let user = null;
-    let companyType = 
+    let companyType = null;
+
     before(function(done) {
       setup().then(function() {
         return db.User.findOne({firstName: 'Alice'})
@@ -62,7 +63,7 @@ describe('Activity model', function() {
         done();
       })
       .catch(done);
-    })
+    });
 
     it("should update the owner's array of activities", function(done) {
       const oldLength = user.activities.length;
@@ -86,6 +87,24 @@ describe('Activity model', function() {
       })
       .catch(done);
     });
+
+    it("should not add if the activity isn't new", function(done) {
+      let length = user.activities.length;
+      db.User.findById(user.id).populate('activities')
+      .then(function(user) {
+        let activity = user.activities[0];
+        activity.name = "new name";
+        return activity.save();
+      })
+      .then(function() {
+        expect(user.activities.length).to.equal(length);
+        done()
+      })
+      .catch(done);
+    });
+
+    after(teardown);
+    
   });
 
 });

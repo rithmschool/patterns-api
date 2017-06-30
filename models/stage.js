@@ -30,17 +30,22 @@ const stageSchema = new mongoose.Schema({
   }
 });
 
-stageSchema.post('save', function(stage, next) {
-  Activity.findById(stage.activity).then(function(activity) {
-    activity.stages.push(stage.id);
-    return activity.save();
-  })
-  .then(function() {
+stageSchema.pre('save', function(next) {
+  let stage = this;
+  if (stage.isNew) {
+    Activity.findById(stage.activity).then(function(activity) {
+      activity.stages.push(stage.id);
+      return activity.save();
+    })
+    .then(function() {
+      next();
+    })
+    .catch(function(error) {
+      next(error);
+    });
+  } else {
     next();
-  })
-  .catch(function(error) {
-    next(error);
-  });
+  }
 });
 
 stageSchema.plugin(findOrCreate);
