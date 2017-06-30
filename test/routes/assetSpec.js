@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
-describe('GET /assets/:a_id/childassets', function() {
+xdescribe('GET /assets/:a_id/childassets', function() {
   let asset = null;
   let child = null;
   let user = null;
@@ -77,7 +77,7 @@ describe('GET /assets/:a_id/childassets', function() {
   });
 });
 
-describe('POST /assets/:a_id/childassets', function() {
+xdescribe('POST /assets/:a_id/childassets', function() {
   let parent = null;
   let user = null;
   let type = null;
@@ -144,7 +144,7 @@ describe('POST /assets/:a_id/childassets', function() {
   });
 });
 
-describe('PATCH /assets/:a_id/childassets/:c_id', function() {
+xdescribe('PATCH /assets/:a_id/childassets/:c_id', function() {
   let child = null;
   let parent = null;
   let user = null;
@@ -241,7 +241,7 @@ describe('PATCH /assets/:a_id/childassets/:c_id', function() {
   });
 });
 
-describe('DELETE /assets/:a_id/childassets/:c_id', function() {
+xdescribe('DELETE /assets/:a_id/childassets/:c_id', function() {
   let parent = null; // Microsoft
   let child = null; // Brand (target)
   let grandchild = null; // Logo
