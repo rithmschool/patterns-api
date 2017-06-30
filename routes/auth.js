@@ -1,11 +1,11 @@
-let express = require("express");
-let router = express.Router();
-let jwt = require('jsonwebtoken');
-let passport = require("passport");
-let db = require("../models");
-let cors = require("cors");
-let axios = require('axios');
-let qs = require("qs");
+const express = require("express");
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const passport = require("passport");
+const db = require("../models");
+const cors = require("cors");
+const axios = require('axios');
+const qs = require("qs");
 
 router.get('/google',
   passport.authenticate('google', {
@@ -73,12 +73,11 @@ router.post('/google/callback',
           name: "Company",
           createdBy: user.id
         });
-        type.save();
+        return type.save();
       } else {
         newUser = false;
-        type = db.Type.findOne({name: "Company"});
+        return db.Type.findOne({name: "Company"});
       }
-      return type;
     })
     .then(function(newType){
       type = newType;
@@ -99,20 +98,20 @@ router.post('/google/callback',
         activity = newActivity;
         userId = activity.user;
         return db.Stage.create([
-        {
-          name: "Research",
-          activity: activity.id,
-          createdBy: userId
-        },{
-          name: "Apply",
-          activity: activity.id,
-          createdBy: userId
-        },{
-          name: "Follow Up",
-          activity: activity.id,
-          createdBy: userId
-        }
-        ]);
+          {
+            name: "Research",
+            activity: activity.id,
+            createdBy: userId
+          },{
+            name: "Apply",
+            activity: activity.id,
+            createdBy: userId
+          },{
+            name: "Follow Up",
+            activity: activity.id,
+            createdBy: userId
+          }
+          ]);
       } else {
         return null;
       }
@@ -137,7 +136,6 @@ router.post('/google/callback',
       response.status(200).send(token);
     })
     .catch(function(error) {
-      console.log("ERR", error);
       response.status(500).send(error);
     });
   }
