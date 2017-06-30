@@ -17,12 +17,9 @@ router.get('/', function(req, res) {
 router.post('/', function(req, res) {
   let newAsset = new db.Asset(req.body);
   const authHeader = req.headers['authorization'];
-  if(authHeader) {
-    let token = authHeader.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-      newAsset.createdBy = decoded.mongoId;
-    });
-  }
+  const token = authHeader.split(" ")[1];
+  const payload = jwt.decode(token);
+  newAsset.createdBy = payload.mongoId;
   let parent = null;
   db.Asset.findById(req.params.a_id)
     .then(function(parentAsset) {

@@ -24,7 +24,6 @@ router.post('/google/callback',
     let activity = null;
     let stages = null;
     let token = null;
-    let newUser = false;
     axios({
       method: 'post',
       url: 'https://www.googleapis.com/oauth2/v4/token',

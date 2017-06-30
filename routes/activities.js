@@ -36,12 +36,9 @@ router.post('/', ensureCorrectUser, function(req, res) {
   let newActivity = new db.Activity(req.body);
   let user = null;
   const authHeader = req.headers['authorization'];
-  if(authHeader) {
-    let token = authHeader.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-      newActivity.createdBy = decoded.mongoId;
-    });
-  }
+  const token = authHeader.split(" ")[1];
+  const payload = jwt.decode(token);
+  newActivity.createdBy = payload.mongoId;
   db.User.findById(req.params.u_id)
     .then(function(foundUser) {
       user = foundUser;
