@@ -17,12 +17,9 @@ router.get('/', function(req, res) {
 router.post('/', function(req, res) {
   let newType = new db.Type(req.body)
   const authHeader = req.headers['authorization'];
-  if(authHeader) {
-    let token = authHeader.split(" ")[1];
-    jwt.verify(token, process.env.SECRET_KEY, function (err, decoded) {
-      newType.createdBy = decoded.mongoId;
-    });
-  }
+  const token = authHeader.split(" ")[1];
+  const payload = jwt.decode(token);
+  newType.createdBy = payload.mongoId;
   newType.save()
     .then(function(newType) {
       res.send(newType);
