@@ -32,32 +32,18 @@ router.get('/:a_id', function(req, res) {
   });
 });
 
-router.post('/', ensureCorrectUser, function(req, res) {
+router.post('/', ensureCorrectUser, function(req, res, next) {
   let newActivity = new db.Activity(req.body);
-  let user = null;
   const authHeader = req.headers['authorization'];
   const token = authHeader.split(" ")[1];
   const payload = jwt.decode(token);
-  newActivity.createdBy = payload.mongoId;
-  db.User.findById(req.params.u_id)
-    .then(function(foundUser) {
-      user = foundUser;
-      return user.save();
-    })
-    .then(function(foundUser) {
-      newActivity.user = foundUser;
-      return newActivity.save();
-    })
-    .then(function(newActivity) {
-      user.activities.push(newActivity.id);
-      return user.save();
-    })
-    .then(function() {
-      res.send(newActivity);
-    })
-    .catch(function(err){
-      res.status(500).send(err);
-    });
+  newActivity.createdBy = decoded.mongoId;
+  newActivity.save().then(function() {
+    res.send(newActivity);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
 });
 
 module.exports = router;

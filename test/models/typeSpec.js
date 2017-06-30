@@ -2,7 +2,7 @@ var expect = require('chai').expect;
 
 var Type = require('../../models/type');
  
-describe('type model', function() {
+xdescribe('type model', function() {
   it('should be invalid if name is empty', function(done) {
     var t = new Type();
     t.validate(function(err) {

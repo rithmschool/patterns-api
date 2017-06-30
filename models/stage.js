@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const findOrCreate = require('mongoose-findorcreate');
+const Activity = require('./activity');
 const stageSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -27,6 +28,19 @@ const stageSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   }
+});
+
+stageSchema.post('save', function(stage, next) {
+  Activity.findById(stage.activity).then(function(activity) {
+    activity.stages.push(stage.id);
+    return activity.save();
+  })
+  .then(function() {
+    next();
+  })
+  .catch(function(error) {
+    next(error);
+  });
 });
 
 stageSchema.plugin(findOrCreate);
