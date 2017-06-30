@@ -30,6 +30,7 @@ router.get('/:a_id', function(req, res) {
   .catch(function(err){
     res.status(500).send(err);
   });
+});
 
 router.post('/', ensureCorrectUser, function(req, res) {
   let newActivity = new db.Activity(req.body);

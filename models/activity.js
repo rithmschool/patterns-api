@@ -24,7 +24,7 @@ const activitySchema = new mongoose.Schema({
   }, 
   rootAssetType: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Asset',
+    ref: 'Type',
     required: true
   }
 });
