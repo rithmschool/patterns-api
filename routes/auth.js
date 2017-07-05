@@ -42,7 +42,8 @@ router.post('/google/callback',
         googleId: res.data.id, 
         firstName: res.data.given_name, 
         lastName: res.data.family_name,
-        email:res.data.email 
+        email: res.data.email,
+        picture: res.data.picture,
       });
     })
     .then(function(currentUser) {
@@ -52,6 +53,7 @@ router.post('/google/callback',
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        picture: user.picture,
         mongoId: user._id
       };
       token = jwt.sign(payload, process.env.SECRET_KEY);
