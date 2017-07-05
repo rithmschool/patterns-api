@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   }, 
   firstName: String,
   lastName: String,
+  picture: String,
   activities: [{
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Activity'
