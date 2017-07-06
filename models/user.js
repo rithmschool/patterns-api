@@ -18,11 +18,16 @@ const userSchema = new mongoose.Schema({
   }]
 });
 
+userSchema.pre('save', function(next) {
+  this.wasNew = this.isNew;
+  next();
+})
+
 userSchema.post('save', function(user, next) {
   let type = null;
   let activity = null;
   let stages = null;
-  if (user.isNew) {
+  if (user.wasNew) {
     mongoose.model('Type').findOne({name: "Company"})
     .then(function(foundType){
       if (foundType) {
@@ -61,11 +66,7 @@ userSchema.post('save', function(user, next) {
         }
       ]);
     })
-    .then(function(stages){
-      activity.stages.push(...stages);
-      return activity.save();
-    })
-    .then(function(activity){
+    .then(function(){
       user.activities.push(activity); 
     })
     .then(function() {

@@ -38,18 +38,25 @@ describe('Activities routes', function() {
         .set('authorization', 'Bearer: ' + token)
         .expect(200)
         .expect(function(res) {
-          expect(res.body.length).to.equal(2);
+          expect(res.body.length).to.equal(3);
           expect(res.body.map(a => a.name)).to.have.members([
+            "Job Search",
             "Bob's Job Search",
             "Bob's Other Job Search"
           ]);
-          const bobStages = res.body[0].stages.concat(res.body[1].stages);
-          expect(bobStages.length).to.equal(4);
+          const bobStages = res.body[0].stages.concat(
+            res.body[1].stages,
+            res.body[2].stages
+          );
+          expect(bobStages.length).to.equal(7);
           expect(bobStages.map(s => s.name)).to.have.members([
             "Bob's Ideas",
             "Bob's Other Ideas",
             "Bob's Other Research",
-            "Bob's Other Follow Up"
+            "Bob's Other Follow Up",
+            "Research",
+            "Follow Up",
+            "Apply"
           ]);
         })
         .end(done);
