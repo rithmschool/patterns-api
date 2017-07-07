@@ -7,7 +7,11 @@ const assetSchema = new mongoose.Schema({
   },
   url: String,
   logo: String,
-  assets: [this],
+  assets: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Asset',
+    required: true
+  }],
   createdAt: {
     type: Date, 
     default: Date.now
@@ -32,9 +36,35 @@ const assetSchema = new mongoose.Schema({
   }
 });
 
+assetSchema.pre('save', function(next) {
+  let asset = this;
+  if (asset.isNew) {
+    mongoose.model('Type').findById(asset.typeId)
+    .then(function(type) {
+      type.assets.push(asset.id);
+      return type.save();
+    })
+    .then(function(type) {
+      return mongoose.model('Asset').findById(asset.parent);
+    })
+    .then(function(parent) {
+      if (parent) {
+        parent.assets.push(asset.id);
+        return parent.save();
+      }
+    })
+    .then(function() {
+      next();
+    })
+    .catch(function(err) {
+      next(err);
+    })
+  }
+});
+
 assetSchema.pre('remove', function(next) {
-  let target = this;
-  Asset.find({parent: target.id})
+  let asset = this;
+  mongoose.model('Asset').find({parent: asset.id})
   .then(function(childAssets) {
     // remove all child assets
     return Promise.all(childAssets.map(function(child) {
@@ -42,24 +72,26 @@ assetSchema.pre('remove', function(next) {
     }))
   })
   .then(function(){
-    // remove target from parent, if it has a parent
-    return Asset.findById(target.parent);
+    // remove asset from parent, if it has a parent
+    return mongoose.model('Asset').findById(asset.parent);
   })
   .then(function(foundParent){
     if(foundParent){
-      let foundIdx = foundParent.assets.indexOf(target.id);
+      let foundIdx = foundParent.assets.indexOf(asset.id);
       foundParent.assets.splice(foundIdx, 1);
       return foundParent.save();
     }
   })
   .then(function() {
-    // remove target from array of assets of same type
-    return mongoose.model('Type').findById(target.typeId);
+    // remove asset from array of assets of same type
+    return mongoose.model('Type').findOne({id: asset.typeId});
   })
   .then(function(type) {
-    let foundIdx = type.assets.indexOf(target.id);
-    type.assets.splice(foundIdx, 1);
-    return type.save();
+    if (type) {
+      let foundIdx = type.assets.indexOf(asset.id);
+      type.assets.splice(foundIdx, 1);
+      return type.save();
+    }
   })
   .then(function(){
     next();

@@ -5,6 +5,7 @@ function setup(done) {
   let users = [];
   let types = [];
   let activities = [];
+  let assets = [];
   return db.User.create([{
     googleId: "1",
     firstName: "Alice",
@@ -19,10 +20,6 @@ function setup(done) {
   .then(function(createdUsers) {
     users = createdUsers;
     return db.Type.create([{
-      isAgent: true,
-      name: "Company",
-      createdBy: users[0].id
-    }, {
       isAgent: false,
       name: "Brand",
       createdBy: users[1].id
@@ -34,6 +31,28 @@ function setup(done) {
   })
   .then(function(createdTypes) {
     types = createdTypes;
+    return db.Type.findOne({name: 'Company'})
+  })
+  .then(function(company) {
+    types.unshift(company);
+  })
+  .then(function(createdTypes) {
+    return db.Asset.create([{
+      name: "Google",
+      url: "google.com",
+      logo: "google logo",
+      typeId: types[0].id,
+      createdBy: users[0].id
+    }, {
+      name: "Facebook",
+      url: "facebook.com",
+      logo: "facebook logo",
+      typeId: types[0].id,
+      createdBy: users[1].id
+    }])
+  })
+  .then(function(parentAssets) {
+    assets = parentAssets;
     return db.Activity.create([{
       name: "Alice's Job Search",
       createdBy: users[0].id,
