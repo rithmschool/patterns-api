@@ -1,4 +1,4 @@
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 const db = require('../../models');
 const teardown = require('../seed').teardown;
 
@@ -6,7 +6,7 @@ describe("User model", function() {
 
   describe('Basic validations', function() {
     it('should be invalid if googleId is empty', function(done) {
-      var u = new db.User();
+      const u = new db.User();
 
       u.validate(function(err) {
         expect(err.errors.googleId).to.exist;
@@ -15,7 +15,7 @@ describe("User model", function() {
     });
 
     it('should be invalid if email is empty', function(done) {
-      var u = new db.User();
+      const u = new db.User();
 
       u.validate(function(err) {
         expect(err.errors.email).to.exist;

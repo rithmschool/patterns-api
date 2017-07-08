@@ -1,4 +1,4 @@
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 const db = require('../../models');
 const setup = require('../seed').setup;
 const teardown = require('../seed').teardown;
@@ -8,7 +8,7 @@ describe('Type model', function() {
   describe('Basic Validations', function() {
 
     it('should be invalid if name is empty', function(done) {
-      var t = new db.Type();
+      const t = new db.Type();
       t.validate(function(err) {
         expect(err.errors.name).to.exist;
         done();
@@ -16,7 +16,7 @@ describe('Type model', function() {
     });
 
     it('should be invalid if isAgent is empty', function(done) {
-      var t = new db.Type();
+      const t = new db.Type();
       t.validate(function(err) {
         expect(err.errors.isAgent).to.exist;
         done();
@@ -24,7 +24,7 @@ describe('Type model', function() {
     });
 
     it('should be invalid if createdBy is empty', function(done) {
-      var t = new db.Type();
+      const t = new db.Type();
       t.validate(function(err) {
         expect(err.errors.createdBy).to.exist;
         done();

@@ -1,4 +1,4 @@
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 const db = require('../../models');
 const setup = require('../seed').setup;
 const teardown = require('../seed').teardown;
@@ -8,7 +8,7 @@ describe('Stage model', function() {
   describe('Basic validations', function() {
 
     it('should be invalid if name is empty', function(done) {
-      var a = new db.Stage();
+      const a = new db.Stage();
       a.validate(function(err) {
         expect(err.errors.name).to.exist;
         done();
@@ -16,7 +16,7 @@ describe('Stage model', function() {
     });
 
     it('should be invalid if createdBy is empty', function(done) {
-      var a = new db.Stage();
+      const a = new db.Stage();
       a.validate(function(err) {
         expect(err.errors.createdBy).to.exist;
         done();
@@ -24,7 +24,7 @@ describe('Stage model', function() {
     });
 
     it('should be invalid if activity is empty', function(done) {
-      var a = new db.Stage();
+      const a = new db.Stage();
       a.validate(function(err) {
         expect(err.errors.activity).to.exist;
         done();
@@ -32,13 +32,13 @@ describe('Stage model', function() {
     });
 
     it('should create a default createdAt date', function(done) {
-      var a = new db.Stage( { name: 'Research' });
+      const a = new db.Stage( { name: 'Research' });
       expect(a.createdAt).to.be.a('date');
       done();
     });
 
     it('should create a default updatedAt date', function(done) {
-      var a = new db.Stage( { name: 'Research' });
+      const a = new db.Stage( { name: 'Research' });
       expect(a.updatedAt).to.be.a('date');
       done();
     });

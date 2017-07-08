@@ -59,6 +59,8 @@ assetSchema.pre('save', function(next) {
     .catch(function(err) {
       next(err);
     })
+  } else {
+    next();
   }
 });
 
