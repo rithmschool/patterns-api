@@ -6,6 +6,7 @@ function setup(done) {
   let types = [];
   let activities = [];
   let companies = [];
+  let stages = [];
   return db.User.create([{
     googleId: "1",
     firstName: "Alice",
@@ -136,7 +137,25 @@ function setup(done) {
       activity: activities[2].id
     }])
   })
-  // add companies to stages
+  .then(function(newStages) {
+    stages = newStages;
+    let bobIdeas = stages.find(s => s.name === "Bob's Ideas");
+    bobIdeas.assets.push(companies[0].id);
+    bobIdeas.assets.push(companies[1].id);
+    return bobIdeas.save();
+  })
+  .then(function() {
+    let bobOtherIdeas = stages.find(s => s.name === "Bob's Other Ideas");
+    let google = companies.find(c => c.name === "Google");
+    bobOtherIdeas.assets.push(google.id);
+    return bobOtherIdeas.save();
+  })
+  .then(function() {
+    let bobOtherResearch = stages.find(s => s.name === "Bob's Other Research");
+    let facebook = companies.find(c => c.name === "Facebook");
+    bobOtherResearch.assets.push(facebook.id);
+    return bobOtherResearch.save();
+  });
 }
 
 function teardown(done) {

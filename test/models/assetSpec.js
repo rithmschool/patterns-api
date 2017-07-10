@@ -118,36 +118,109 @@ describe('Asset model', function() {
 
   describe('Pre-remove hook', function() {
 
-    let user = null;
-
-    before(function(done) {
+    beforeEach(function(done) {
       setup().then(function() {
-        return db.User.findOne({firstName: "Alice"});
-      })
-      .then(function(alice) {
-        user = alice;
         done();
       })
       .catch(done);
     });
 
-    xit("should remove all of its child assets", function(done) {
-
+    it("should remove all of its child assets", function(done) {
+      let asset = null;
+      db.Asset.findOne({name: "Google Brand"})
+      .then(function(googleBrand) {
+        expect(googleBrand.assets.length).to.equal(2);
+        asset = googleBrand;
+        return asset.remove();
+      })
+      .then(function() {
+        return db.Asset.find({parent: asset.id});
+      })
+      .then(function(childAssets) {
+        expect(childAssets.length).to.equal(0);
+        done();
+      })
+      .catch(function(err) {
+        done(err);
+      });
     });
 
-    xit("should be removed from its parent's array of assets, if it has a parent", function(done) {
-
+    it("should be removed from its parent's array of assets, if it has a parent", function(done) {
+      db.Asset.findOne({name: "Google"})
+      .then(function(google) {
+        expect(google.assets.length).to.equal(2);
+        return db.Asset.findById(google.assets[0])
+      })
+      .then(function(child) {
+        return child.remove();
+      })
+      .then(function() {
+        return db.Asset.findOne({name: "Google"})
+      })
+      .then(function(google) {
+        expect(google.assets.length).to.equal(1);
+        done();
+      })
+      .catch(done);
     });
 
-    xit("should be removed from its type's array of assets", function(done) {
-
+    it("should be removed from its type's array of assets", function(done) {
+      db.Type.findOne({name: "Company"}).populate('assets')
+      .then(function(company) {
+        expect(company.assets.length).to.equal(2);
+        let google = company.assets.find(c => c.name === "Google");
+        return google.remove();
+      })
+      .then(function() {
+        return db.Type.findOne({name: "Company"});
+      })
+      .then(function(company) {
+        expect(company.assets.length).to.equal(1);
+        done();
+      })
+      .catch(done);
     });
 
-    xit("should be removed from all stages containing it", function(done) {
-
+    it("should be removed from all stages containing it", function(done) {
+      db.User.findOne({firstName: "Bob"}).populate({
+        path: 'activities',
+        model: 'Activity', 
+        populate: {
+          path: 'stages',
+          model: 'Stage',
+        }
+      })
+      .then(function(bob) {
+        let allStages = [].concat(...bob.activities.map(a => a.stages));
+        expect(allStages.find(s => s.name === "Bob's Ideas").assets.length).to.equal(2);
+        expect(allStages.find(s => s.name === "Bob's Other Ideas").assets.length).to.equal(1);
+        expect(allStages.find(s => s.name === "Bob's Other Research").assets.length).to.equal(1);
+        return db.Asset.findOne({name: "Google"})
+      })
+      .then(function(google) {
+        return google.remove();
+      })
+      .then(function() {
+        return db.User.findOne({firstName: "Bob"}).populate({
+          path: 'activities',
+          model: 'Activity', 
+          populate: {
+            path: 'stages',
+            model: 'Stage',
+          }
+        })
+      })
+      .then(function(bob) {
+        let allStages = [].concat(...bob.activities.map(a => a.stages));
+        expect(allStages.find(s => s.name === "Bob's Ideas").assets.length).to.equal(1);
+        expect(allStages.find(s => s.name === "Bob's Other Ideas").assets.length).to.equal(0);
+        expect(allStages.find(s => s.name === "Bob's Other Research").assets.length).to.equal(1);
+        done();
+      })
+      .catch(done)
     });
 
-    after(teardown);
+    afterEach(teardown);
 
   });
 
