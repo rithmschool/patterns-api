@@ -34,6 +34,7 @@ describe('Type model', function() {
   });
 
   describe('Pre-remove hook', function() {
+
     before(function(done) {
       setup().then(function() {
         done();
@@ -58,6 +59,8 @@ describe('Type model', function() {
       })
       .catch(done);
     });
+
+    after(teardown);
 
   });
 });

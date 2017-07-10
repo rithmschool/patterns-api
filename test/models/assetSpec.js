@@ -46,7 +46,9 @@ describe('Asset model', function() {
   });
 
   describe('Pre-save hook', function() {
+
     let user = null;
+
     before(function(done) {
       setup().then(function() {
         return db.User.findOne({firstName: "Alice"});
@@ -56,7 +58,7 @@ describe('Asset model', function() {
         done();
       })
       .catch(done);
-    })
+    });
 
     it("should update its type's array of assets", function(done) {
       let companyOld = null;
@@ -94,7 +96,7 @@ describe('Asset model', function() {
       .then(function(brand) {
         brandId = brand.id;
         return db.Asset.create({
-          name: "Google Brand",
+          name: "Google New Brand",
           typeId: brandId,
           createdBy: user.id,
           parent: googleOld.id
@@ -105,7 +107,7 @@ describe('Asset model', function() {
       })
       .then(function(googleNew) {
         expect(googleNew.assets.length).to.equal(googleOld.assets.length + 1);
-        expect(googleNew.assets[0].name).to.equal("Google Brand");
+        expect(googleNew.assets.map(a => a.name)).to.include("Google New Brand");
         done();
       })
       .catch(done);
@@ -115,6 +117,20 @@ describe('Asset model', function() {
   });
 
   describe('Pre-remove hook', function() {
+
+    let user = null;
+
+    before(function(done) {
+      setup().then(function() {
+        return db.User.findOne({firstName: "Alice"});
+      })
+      .then(function(alice) {
+        user = alice;
+        done();
+      })
+      .catch(done);
+    });
+
     xit("should remove all of its child assets", function(done) {
 
     });
@@ -130,6 +146,9 @@ describe('Asset model', function() {
     xit("should be removed from all stages containing it", function(done) {
 
     });
+
+    after(teardown);
+
   });
 
 });

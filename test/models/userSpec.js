@@ -5,6 +5,7 @@ const teardown = require('../seed').teardown;
 describe("User model", function() {
 
   describe('Basic validations', function() {
+
     it('should be invalid if googleId is empty', function(done) {
       const u = new db.User();
 
@@ -22,10 +23,13 @@ describe("User model", function() {
         done();
       });
     });
+
   });
 
   describe("Pre-save hook", function() {
+
     let user = null;
+
     before(function(done) {
       db.User.create({
         email: 'test@example.com',

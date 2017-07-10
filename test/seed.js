@@ -5,7 +5,7 @@ function setup(done) {
   let users = [];
   let types = [];
   let activities = [];
-  let assets = [];
+  let companies = [];
   return db.User.create([{
     googleId: "1",
     firstName: "Alice",
@@ -52,7 +52,48 @@ function setup(done) {
     }])
   })
   .then(function(parentAssets) {
-    assets = parentAssets;
+    companies = parentAssets;
+    let google = parentAssets.find(a => a.name === "Google");
+    let facebook = parentAssets.find(a => a.name === "Facebook");
+    let brand = types.find(t => t.name === "Brand");
+    let employees = types.find(t => t.name === "Employees");
+    return db.Asset.create([{
+      name: "Google Brand",
+      typeId: brand.id,
+      createdBy: users[0].id,
+      parent: google.id
+    }, {
+      name: "Google Employees",
+      typeId: employees.id,
+      createdBy: users[0].id,
+      parent: google.id
+    }, {
+      name: "Facebook Brand",
+      typeId: brand.id,
+      createdBy: users[1].id,
+      parent: facebook.id
+    }, {
+      name: "Facebook Employees",
+      typeId: employees.id,
+      createdBy: users[1].id,
+      parent: facebook.id
+    }]);
+  })
+  .then(function(childAssets) {
+    let brand = types.find(t => t.name === "Brand");
+    return db.Asset.create(childAssets.reduce((acc, asset) => acc.concat({
+      name: asset.name + ' subasset',
+      typeId: asset.typeId,
+      createdBy: asset.createdBy,
+      parent: asset.id,
+    }, {
+      name: asset.name + ' another subasset',
+      typeId: asset.typeId,
+      createdBy: asset.createdBy,
+      parent: asset.id,
+    }), []));
+  })
+  .then(function() {
     return db.Activity.create([{
       name: "Alice's Job Search",
       createdBy: users[0].id,
@@ -95,6 +136,7 @@ function setup(done) {
       activity: activities[2].id
     }])
   })
+  // add companies to stages
 }
 
 function teardown(done) {
