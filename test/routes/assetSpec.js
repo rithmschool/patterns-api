@@ -1,356 +1,184 @@
 const db = require("../../models");
 const app = require("../../app");
 const login = require("../helpers").login;
-const testingData = require("../helpers").testingData;
-const testingData2 = require('../helpers').testingData2;
+const setup = require('../seed').setup;
+const teardown = require('../seed').teardown;
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
-describe('GET /assets/:a_id/childassets', function() {
-  let asset = null;
-  let child = null;
-  let user = null;
+describe('Asset routes', function() {
+
   let type = null;
-  before(function(done) {
-    db.User.create(testingData)
-    .then(function(newUser){
-        user = newUser;
-        type = new db.Type({
-          name: "Company",
-          isAgent: true,
-          createdBy: user.id
-        });
-        return type.save();
-      })
-    .then(function(newType){
-      type = newType;
-      asset = new db.Asset({
-        name:'Facebook',
-        url:'https://www.facebook.com/',
-        logo:'https://facebookbrand.com/wp-content/themes/fb-branding/prj-fb-branding/assets/images/fb-art.png',
-        createdBy: user.id,
-        typeId: type.id
-      });
-      return asset.save();
-    })
-    .then(function(newAsset) {
-      asset = newAsset;
-      child = new db.Asset({
-        name: 'Funding',
-        createdBy: user.id,
-        typeId: type.id
-      })
-      return child.save()
-    })
-    .then(function(child) {
-      asset.assets.push(child._id);
-      return asset.save()
-    })
+  let user = null;
+
+  beforeEach(function(done) {
+    setup()
     .then(function() {
+      return db.User.findOne({ firstName: "Alice" });
+    })
+    .then(function(alice) {
+      user = alice;
+      return db.Type.findOne({ name: "Company" }).populate('assets');
+    })
+    .then(function(company) {
+      type = company;
       done();
     })
     .catch(done);
   });
 
-  it('adds a child asset to asset list if token is valid', function(done) {
-    const token = login(testingData);
-    request(app)
-      .get(`/assets/${asset.id}/childassets`)
-      .set('authorization', 'Bearer: ' + token)
-      .expect(200)
-      .expect(function(res) {
-        expect(res.body.name).to.equal('Facebook');
-        expect(res.body.url).to.equal('https://www.facebook.com/');
-        expect(res.body.logo).to.equal('https://facebookbrand.com/wp-content/themes/fb-branding/prj-fb-branding/assets/images/fb-art.png');
-        expect(res.body.assets.length).to.equal(1);
-        expect(res.body.assets[0].name).to.equal('Funding');
-      })
-    .end(done);
-  });
+  describe('GET /types/:id/assets', function() {
 
-  after(function(done) {
-    mongoose.connection.db.dropDatabase(function() {
-      done();
-    })
-  });
-});
-
-describe('POST /assets/:a_id/childassets', function() {
-  let parent = null;
-  let user = null;
-  let type = null;
-  before(function(done) {
-    db.User.create(testingData)
-    .then(function(newUser){
-      user = newUser;
-      type = new db.Type({
-        name: "Company",
-        isAgent: true,
-        createdBy: user.id
-      });
-      return type.save();
-    })
-    .then(function(newType){
-      type = newType;
-      parent = new db.Asset({
-        name:'Facebook',
-        url:'https://www.facebook.com/',
-        logo:'https://facebookbrand.com/wp-content/themes/fb-branding/prj-fb-branding/assets/images/fb-art.png',
-        createdBy: user.id,
-        typeId: type.id
-      });
-      return parent.save();
-    })
-    .then(function(parentAsset) {
-      parent = parentAsset;
-      done();
-    })
-    .catch(done);
-  })
-
-  it('creates a child asset of a parent asset if token is valid', function(done) {
-    const token = login(user);
-    request(app)
-      .post(`/assets/${parent.id}/childassets`)
-      .send({
-        name: 'Brand',
-        typeId: type.id
-      })
-      .set('authorization', 'Bearer: ' + token)
-      .expect(200)
-      .expect(function(res, req) {
-        expect(res.body.name).to.equal('Brand');
-        expect(res.body.id).to.not.be.null;
-        expect(res.body.parent._id).to.equal(parent.id);
-      })
-      .end(done);
-  });
-
-  it('it should be invalid if there is no token', function(done) {
-    request(app)
-      .post(`/assets/${parent.id}/childassets`)
-      .send({random:"data"})
-      .expect(401, {
-        message: "You must be logged in to continue."
-      }, done);
-  });
-
-  after(function(done) {
-    mongoose.connection.db.dropDatabase(function() {
-      done();
-    })
-  });
-});
-
-describe('PATCH /assets/:a_id/childassets/:c_id', function() {
-  let child = null;
-  let parent = null;
-  let user = null;
-  let type = null;
-  before(function(done) {
-    db.User.create(testingData)
-    .then(function(newUser){
-      user = newUser;
-      type = new db.Type({
-        name: "Company",
-        isAgent: true,
-        createdBy: user.id
-      });
-      return type.save();
-    })
-    .then(function(newType) {
-      type = newType;
-      let asset = new db.Asset({
-        name: 'Microsoft',
-        url: 'https://www.microsoft.com/en-us/',
-        logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        createdBy: user.id,
-        typeId: type.id
-      });
-      return asset.save();
-    })
-    .then(function(parentAsset) {
-      parent = parentAsset;
-    })
-    .then(function() {
-      child = new db.Asset({
-        name: 'Brand',
-        url: 'www.brand.com',
-        parent: parent.id,
-        createdBy: user.id,
-        typeId: type.id
-      })
-      return child.save()
-    })
-    .then(function(childAsset) {
-      child = childAsset
-      parent.assets.push(child.id);
-      return parent.save();
-    })
-    .then(function() {
-      done();
-    })
-    .catch(done);
-  });
-
-  it("updates an asset if token is valid", function(done) {
-    const token = login(user);
-    request(app)
-      .patch(`/assets/${parent.id}/childassets/${child.id}`)
-      .send({
-        name: 'Employees',
-        typeId: type.id
-      })
-      .set('authorization', 'Bearer: ' + token)
-      .expect(200)
-      .expect(function(res, req) {
-        expect(res.body.name).to.equal('Employees');
-        expect(res.body.url).to.equal('www.brand.com');
-      })
-      .end(done);
-  });
-
-  it('it should be invalid if there is no token', function(done) {
-    request(app)
-      .patch(`/assets/${parent.id}/childassets/${child.id}`)
-      .send({
-        random: 'data'
-      })
-      .expect(401, {
-        message: "You must be logged in to continue."
-      }, done);
-  });
-
-  it("it should be unauthorized if attempted by another user", function(done) {
-    const token2 = login(testingData2);
-    request(app)
-      .patch(`/assets/${parent.id}/childassets/${child.id}`)
-      .send({random:"data"})
-      .set('authorization', 'Bearer: ' + token2)
-      .expect(401, {
-        message: "Unauthorized"
-      }, done);
-  });
-
-  after(function(done) {
-    mongoose.connection.db.dropDatabase(function() {
-      done();
-    })
-  });
-});
-
-describe('DELETE /assets/:a_id/childassets/:c_id', function() {
-  let parent = null; // Microsoft
-  let child = null; // Brand (target)
-  let grandchild = null; // Logo
-  let user = null;
-  let type = null;
-  before(function(done) {
-    db.User.create(testingData)
-    .then(function(newUser) {
-      user = newUser;
-      let type = new db.Type({
-        isAgent: true,
-        name: 'Company',
-        createdBy: user.id
-      })
-      return type.save();
-    })
-    .then(function(newType) {
-      type = newType;
-      return db.Asset.create({
-        name: 'Microsoft',
-        url: 'https://www.microsoft.com/en-us/',
-        logo: 'http://diylogodesigns.com/blog/wp-content/uploads/2016/04/Microsoft-Logo-PNG.png',
-        typeId: type.id,
-        createdBy: user.id
-      })
-    })
-    .then(function(parentAsset) {
-      parent = parentAsset;
-    })
-    .then(function() {
-      child = new db.Asset({
-        name: 'Brand',
-        parent: parent.id,
-        createdBy: user.id,
-        typeId: type.id
-      })
-      return child.save()
-    })
-    .then(function(childAsset) {
-      child = childAsset;
-      parent.assets.push(child._id);
-      return parent.save()
-    })
-    .then(function(parent) {
-      grandchild = new db.Asset({
-        name: 'Logo',
-        parent: child.id,
-        createdBy: user.id,
-        typeId: type.id
-      })
-      return grandchild.save()
-    })
-    .then(function(foundGrandchild) {
-      grandchild = foundGrandchild;
-      child.assets.push(grandchild._id);
-      return child.save()
-    })
-    .then(function() {
-      done();
-    })
-    .catch(done);
-  });
-
-  it('it should be invalid if there is no token', function(done) {
-    request(app)
-      .delete(`/assets/${parent.id}/childassets/${child.id}`)
-      .expect(401, {
-        message: "You must be logged in to continue."
-      }, done);
-  });
-
-  it("it should be unauthorized if attempted by another user", function(done) {
-    const token2 = login(testingData2);
-    request(app)
-      .delete(`/assets/${parent.id}/childassets/${child.id}`)
-      .set('authorization', 'Bearer: ' + token2)
-      .expect(401, {
-        message: "Unauthorized"
-      }, done);
-  });
-
-  it("deletes target, target from parent's assets array, and target's descendants if token is valid", function(done) {
-    const token = login(user);
-    request(app)
-      .delete(`/assets/${parent.id}/childassets/${child.id}`)
-      .set('authorization', 'Bearer: ' + token)
-      .expect(200)
-      .expect(function(res, req) {
-        expect(res.body).to.deep.equal({});
-      })
-      .end(function() {
-        db.Asset.findById(parent.id)
-        .then(function(foundParent) {
-          expect(foundParent.assets.indexOf(child.id)).to.equal(-1);
+    it('responds with an array of assets if token is valid', function(done) {
+      const token = login(user);
+      request(app)
+        .get(`/types/${type.id}/assets`)
+        .set('authorization', 'Bearer: ' + token)
+        .expect(200)
+        .expect(function(res) {
+          expect(res.body.isAgent).to.be.true;
+          expect(res.body.name).to.equal('Company');
+          expect(res.body.assets.length).to.equal(2);
+          expect(res.body.assets.map(a => a.name)).to.have.members([
+            'Google',
+            'Facebook'
+          ]);
         })
-        .then(function(){
-          return db.Asset.findOne(grandchild);
-        })
-        .then(function(foundGrandchild) {
-          expect(foundGrandchild).to.be.null;
-          done();
-        })
-        .catch(done);
-      })
+        .end(done);
     });
 
-  after(function(done) {
-    mongoose.connection.db.dropDatabase(function() {
-      done();
-    })
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .get(`/types/${type.id}/assets`)
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
   });
+
+  describe('POST /types/:id/assets', function() {
+
+    it('creates a new asset of the given type if token is valid', function(done) {
+      const token = login(user);
+      request(app)
+        .post(`/types/${type.id}/assets`)
+        .send({
+          name: 'Amazon',
+          url: 'https://www.amazon.com/',
+          logo: 'amazon logo'
+        })
+        .set('authorization', 'Bearer: ' + token)
+        .expect(200)
+        .expect(function(res) {
+          expect(res.body.name).to.equal('Amazon');
+          expect(res.body.url).to.equal('https://www.amazon.com/');
+          expect(res.body.logo).to.equal('amazon logo');
+          expect(res.body.id).to.not.be.null;
+        })
+        .end(done);
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      request(app)
+        .post(`/types/${type.id}/assets`)
+        .send({random:"data"})
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+  });
+
+  describe('PATCH /types/:t_id/assets/:a_id', function() {
+
+    it('updates an asset of the given type if token is valid', function(done) {
+      const token = login(user);
+      const google = type.assets.find(a => a.name === "Google");
+      request(app)
+        .patch(`/types/${type.id}/assets/${google.id}`)
+        .send({
+          name: 'New Google'
+        })
+        .set('authorization', 'Bearer: ' + token)
+        .expect(200)
+        .expect(function(res) {
+          expect(res.body.name).to.equal('New Google');
+          expect(res.body.url).to.equal('google.com');
+        })
+        .end(done);
+    });
+
+    it('is invalid if there is no token', function(done) {
+      const google = type.assets.find(a => a.name === "Google");
+      request(app)
+        .patch(`/types/${type.id}/assets/${google.id}`)
+        .send({ random: "data" })
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+    it('ensures that the user is authorized', function(done) {
+      const token = login(user);
+      const facebook = type.assets.find(a => a.name === "Facebook");
+      request(app)
+        .patch(`/types/${type.id}/assets/${facebook.id}`)
+        .send({
+          name: "fail"
+        })
+        .set('authorization', 'Bearer: ' + token)
+        .expect(401, {
+          message: "Unauthorized"
+        }, done);
+    });
+
+  });
+
+  describe('DELETE /types/:t_id/assets/:a_id', function() {
+
+    it("deletes an asset if the token is valid", function(done) {
+      const token = login(user);
+      const google = type.assets.find(a => a.name === "Google");
+      request(app)
+        .delete(`/types/${type.id}/assets/${google.id}`)
+        .set('authorization', 'Bearer: ' + token)
+        .expect(200)
+        .expect(function(res, req) {
+          expect(res.body).to.deep.equal({});
+        })
+        .end(function() {
+          db.Asset.findById(google.id)
+          .then(function(deletedAsset) {
+            expect(deletedAsset).to.be.null;
+            done();
+          })
+          .catch(done);
+        });
+    });
+
+    it('it should be invalid if there is no token', function(done) {
+      const google = type.assets.find(a => a.name === "Google");
+      request(app)
+        .delete(`/types/${type.id}/assets/${google.id}`)
+        .expect(401, {
+          message: "You must be logged in to continue."
+        }, done);
+    });
+
+    it('ensures that the user is authorized', function(done) {
+      const token = login(user);
+      const facebook = type.assets.find(a => a.name === "Facebook");
+      request(app)
+        .delete(`/types/${type.id}/assets/${facebook.id}`)
+        .set('authorization', 'Bearer: ' + token)
+        .expect(401, {
+          message: "Unauthorized"
+        }, done);
+    });
+
+  });
+
+  afterEach(teardown);
+
 });

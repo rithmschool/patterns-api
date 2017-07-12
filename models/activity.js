@@ -17,7 +17,7 @@ const activitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Stage'
   }],
-  user: {
+  createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -26,6 +26,25 @@ const activitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Type',
     required: true
+  }
+});
+
+activitySchema.pre('save', function(next) {
+  let activity = this;
+  if (activity.isNew) {
+    mongoose.model('User').findById(activity.createdBy)
+    .then(function(user) {
+      user.activities.push(activity.id);
+      return user.save();
+    })
+    .then(function() {
+      next();
+    })
+    .catch(function(error) {
+      next(error);
+    });
+  } else {
+    next();
   }
 });
 

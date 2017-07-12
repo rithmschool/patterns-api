@@ -5,9 +5,9 @@ const db = require("../models");
 const ensureCorrectUser = require('./helpers').ensureCorrectUser;
 
 router.get('/', function(req, res) {
-  db.Asset.findById(req.params.a_id).populate('assets')
-  .then(function(assets){
-    res.send(assets);
+  db.Type.findById(req.params.t_id).populate('assets')
+  .then(function(type){
+    res.send(type);
   })
   .catch(function(err){
     res.status(500).send(err);
@@ -19,31 +19,19 @@ router.post('/', function(req, res) {
   const authHeader = req.headers['authorization'];
   const token = authHeader.split(" ")[1];
   const payload = jwt.decode(token);
+  newAsset.typeId = req.params.t_id;
   newAsset.createdBy = payload.mongoId;
-  let parent = null;
-  db.Asset.findById(req.params.a_id)
-    .then(function(parentAsset) {
-      parent = parentAsset;
-      return parent.save();
-    })
-    .then(function(parentAsset) {
-      newAsset.parent = parentAsset;
-      return newAsset.save();
-    })
-    .then(function(newAsset) {
-      parent.assets.push(newAsset.id);
-      return parent.save();
-    })
-    .then(function() {
-      res.send(newAsset);
-    })
-    .catch(function(err){
-      res.status(500).send(err);
-    });
+  newAsset.save()
+  .then(function() {
+    res.status(200).send(newAsset);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
 });
 
-router.patch('/:c_id', ensureCorrectUser, function(req, res) {
-  db.Asset.findByIdAndUpdate(req.params.c_id, req.body, {new: true})
+router.patch('/:a_id', ensureCorrectUser, function(req, res) {
+  db.Asset.findByIdAndUpdate(req.params.a_id, req.body, {new: true})
   .then(function(updatedAsset) {
     res.status(200).send(updatedAsset);
   })
@@ -52,12 +40,12 @@ router.patch('/:c_id', ensureCorrectUser, function(req, res) {
   });
 });
 
-router.delete('/:c_id', ensureCorrectUser, function(req, res) {
-  db.Asset.findById(req.params.c_id)
-  .then(function(target){
-    return target.remove();
+router.delete('/:a_id', ensureCorrectUser, function(req, res) {
+  db.Asset.findById(req.params.a_id)
+  .then(function(foundAsset){
+    return foundAsset.remove();
   })
-  .then(function() {
+  .then(function(){
     res.sendStatus(200);
   })
   .catch(function(err){

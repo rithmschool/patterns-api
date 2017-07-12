@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const findOrCreate = require('mongoose-findorcreate');
+const findOrCreate = require("mongoose-findorcreate");
+const tree = require("mongoose-path-tree-promisify");
 const assetSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -7,7 +8,11 @@ const assetSchema = new mongoose.Schema({
   },
   url: String,
   logo: String,
-  assets: [this],
+  assets: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Asset',
+    required: true
+  }],
   createdAt: {
     type: Date, 
     default: Date.now
@@ -23,7 +28,8 @@ const assetSchema = new mongoose.Schema({
   },
   parent: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Asset'
+    ref: 'Asset',
+    index: true
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -32,43 +38,80 @@ const assetSchema = new mongoose.Schema({
   }
 });
 
+assetSchema.plugin(findOrCreate);
+assetSchema.plugin(tree, { parentExists: true });
+
+assetSchema.pre('save', function(next) {
+  let asset = this;
+  if (asset.isNew) {
+    mongoose.model('Type').findById(asset.typeId)
+    .then(function(type) {
+      type.assets.push(asset.id);
+      return type.save();
+    })
+    .then(function(type) {
+      return mongoose.model('Asset').findById(asset.parent);
+    })
+    .then(function(parent) {
+      if (parent) {
+        parent.assets.push(asset.id);
+        return parent.save();
+      }
+    })
+    .then(function() {
+      next();
+    })
+    .catch(function(err) {
+      next(err);
+    })
+  } else {
+    next();
+  }
+});
+
 assetSchema.pre('remove', function(next) {
-  let target = this;
-  Asset.find({parent: target.id})
-  .then(function(childAssets) {
-    // remove all child assets
-    return Promise.all(childAssets.map(function(child) {
-      return child.remove();
-    }))
+  let asset = this;
+  let descendants = null;
+  asset.getChildren(true).then(children => {
+    descendants = children;
+    return mongoose.model('Asset').remove({ _id: { $in: descendants.map(d => d._id) }})
   })
-  .then(function(){
-    // remove target from parent, if it has a parent
-    return Asset.findById(target.parent);
+  .then(function() {
+    return mongoose.model('Asset').findById(asset.parent)
   })
   .then(function(foundParent){
     if(foundParent){
-      let foundIdx = foundParent.assets.indexOf(target.id);
-      foundParent.assets.splice(foundIdx, 1);
+      foundParent.assets.pull(asset.id);
       return foundParent.save();
     }
   })
   .then(function() {
-    // remove target from array of assets of same type
-    return mongoose.model('Type').findById(target.typeId);
+    let typesToUpdate = descendants.concat(asset).reduce(function(acc, asset) {
+      acc[asset.typeId] = acc[asset.typeId] || new Set();
+      acc[asset.typeId].add(asset.id);
+      return acc;
+    }, {})
+    return Promise.all(Object.keys(typesToUpdate).map(function(id) {
+      return mongoose.model('Type').findByIdAndUpdate(id, {
+        $pullAll: { assets: Array.from(typesToUpdate[id]) }
+      })
+    }))
   })
-  .then(function(type) {
-    let foundIdx = type.assets.indexOf(target.id);
-    type.assets.splice(foundIdx, 1);
-    return type.save();
+  .then(function() {
+    return mongoose.model('Stage').find({ assets: { $in: descendants.concat(asset).map(d => d._id) }})
   })
-  .then(function(){
+  .then(function(stages) {
+    return Promise.all(stages.map(function(stage) {
+      return mongoose.model('Stage').findByIdAndUpdate(stage.id, {
+        $pullAll: { assets: descendants.concat(asset).map(d => d._id) }
+      })
+    }))
+  })
+  .then(function() {
     next();
   })
-  .catch(function(err){
-    next(err);
-  });
+  .catch(next);
 });
 
-assetSchema.plugin(findOrCreate);
 const Asset = mongoose.model('Asset', assetSchema);
 module.exports = Asset;

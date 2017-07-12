@@ -29,6 +29,25 @@ const stageSchema = new mongoose.Schema({
   }
 });
 
+stageSchema.pre('save', function(next) {
+  let stage = this;
+  if (stage.isNew) {
+    mongoose.model('Activity').findById(stage.activity)
+    .then(function(activity) {
+      activity.stages.push(stage.id);
+      return activity.save();
+    })
+    .then(function() {
+      next();
+    })
+    .catch(function(error) {
+      next(error);
+    });
+  } else {
+    next();
+  }
+});
+
 stageSchema.plugin(findOrCreate);
 const Stage = mongoose.model('Stage', stageSchema);
 module.exports = Stage;
