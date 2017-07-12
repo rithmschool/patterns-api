@@ -31,9 +31,7 @@ typeSchema.pre('remove', function(next) {
   .then(function() {
     next();
   })
-  .catch(function(err){
-    next(err);
-  });
+  .catch(next);
 });
 
 typeSchema.plugin(findOrCreate);

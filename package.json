@@ -13,6 +13,7 @@
     "method-override": "^2.3.9",
     "mongoose": "^4.10.7",
     "mongoose-findorcreate": "^2.0.0",
+    "mongoose-path-tree-promisify": "mmmaaatttttt/mongoose-path-tree-promisify",
     "passport": "^0.3.2",
     "passport-google-oauth": "^1.0.0",
     "qs": "^6.4.0"

@@ -19,11 +19,15 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', function(next) {
-  let user = this;
+  this.wasNew = this.isNew;
+  next();
+})
+
+userSchema.post('save', function(user, next) {
   let type = null;
   let activity = null;
   let stages = null;
-  if (user.isNew) {
+  if (user.wasNew) {
     mongoose.model('Type').findOne({name: "Company"})
     .then(function(foundType){
       if (foundType) {
@@ -40,7 +44,7 @@ userSchema.pre('save', function(next) {
       type = foundType;
       return mongoose.model('Activity').create({
         name: "Job Search",
-        user: user.id,
+        createdBy: user.id,
         rootAssetType: type.id
       });
     })
@@ -62,11 +66,7 @@ userSchema.pre('save', function(next) {
         }
       ]);
     })
-    .then(function(stages){
-      activity.stages.push(...stages);
-      return activity.save();
-    })
-    .then(function(activity){
+    .then(function(){
       user.activities.push(activity); 
     })
     .then(function() {

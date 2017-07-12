@@ -26,7 +26,6 @@ function ensureCorrectUser(req, res, next){
   if(authHeader) {
     let token = authHeader.split(" ")[1];
     let mappedModel = {
-      c_id: db.Asset,
       a_id: db.Asset,
       t_id: db.Type
     }
@@ -41,9 +40,7 @@ function ensureCorrectUser(req, res, next){
           });
         }
       } else {
-        if (req.params.c_id) {
-          param = "c_id";
-        } else if (req.params.a_id) {
+        if (req.params.a_id) {
           param = "a_id";
         } else if (req.params.t_id) {
           param = "t_id";
