@@ -1,12 +1,10 @@
-const mongoose = require('mongoose');
 const db = require("../../models");
 const app = require("../../app");
 const login = require("../helpers").login;
-const request = require('supertest');
-const jwt = require('jsonwebtoken');
-const expect = require('chai').expect;
 const setup = require('../seed').setup;
 const teardown = require('../seed').teardown;
+const request = require('supertest');
+const expect = require('chai').expect;
 
 describe('Activity routes', function() {
 
@@ -14,6 +12,7 @@ describe('Activity routes', function() {
   let otherUser = null;
   let token = null;
   let companyType = null;
+
   before(function(done) {
     setup().then(function() {
       return db.User.find({});
@@ -23,7 +22,8 @@ describe('Activity routes', function() {
       otherUser = users.find(u => u.firstName === "Alice");
       token = login(user);
       return db.Type.findOne({name: "Company"})
-    }).then(function(type) {
+    })
+    .then(function(type) {
       companyType = type;
       done();
     })

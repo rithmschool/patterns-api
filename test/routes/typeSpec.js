@@ -4,8 +4,6 @@ const login = require("../helpers").login;
 const setup = require('../seed').setup;
 const teardown = require('../seed').teardown;
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const expect = require('chai').expect;
 
 describe('Type routes', function() {
@@ -207,7 +205,7 @@ describe('Type routes', function() {
         }, done);
     });
 
-    it('deletes a type and all assets of that type if token is valid', function(done) { 
+    it('deletes a type if the token is valid', function(done) {
       const token = login(user);
       request(app)
         .delete(`/types/${type.id}`)
