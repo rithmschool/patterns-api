@@ -2,25 +2,25 @@ const mongoose = require('mongoose');
 const db = require("../../models");
 const app = require("../../app");
 const login = require("../helpers").login;
-const testingData = require("../helpers").testingData;
-const testingData2 = require('../helpers').testingData2;
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const expect = require('chai').expect;
 const setup = require('../seed').setup;
 const teardown = require('../seed').teardown;
 
-describe('Activities routes', function() {
+describe('Activity routes', function() {
 
   let user = null;
+  let otherUser = null;
   let token = null;
   let companyType = null;
   before(function(done) {
     setup().then(function() {
-      return db.User.findOne({firstName: "Bob"});
+      return db.User.find({});
     })
-    .then(function(bob) {
-      user = bob;
+    .then(function(users) {
+      user = users.find(u => u.firstName === "Bob");
+      otherUser = users.find(u => u.firstName === "Alice");
       token = login(user);
       return db.Type.findOne({name: "Company"})
     }).then(function(type) {
@@ -104,7 +104,7 @@ describe('Activities routes', function() {
       });
 
       it("it should be unauthorized if attempted by another user", function(done) {
-        const token2 = login(testingData2);
+        const token2 = login(otherUser);
         request(app)
           .post(`/users/${user.id}/activities`)
           .send({

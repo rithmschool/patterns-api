@@ -7,19 +7,25 @@ function setup(done) {
   let activities = [];
   let companies = [];
   let stages = [];
-  return db.User.create([{
+  return db.User.create({
     googleId: "1",
     firstName: "Alice",
     lastName: "Smith",
-    email: "alice@example.com"
-  }, {
-    googleId: "2",
-    firstName: "Bob",
-    lastName: "Jones",
-    email: "bob@example.com"
-  }])
-  .then(function(createdUsers) {
-    users = createdUsers;
+    email: "alice@example.com",
+  })
+  .then(function(alice) { 
+    users = [alice];
+    // need to run user creation sequentially to avoid 
+    // creating two company types
+    return db.User.create({
+      googleId: "2",
+      firstName: "Bob",
+      lastName: "Jones",
+      email: "bob@example.com",
+    })
+  })
+  .then(function(bob) {
+    users.push(bob);
     return db.Type.create([{
       isAgent: false,
       name: "Brand",

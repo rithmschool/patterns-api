@@ -41,7 +41,7 @@ passport.use(new GoogleStrategy({
 
 app.use('/auth', authRoutes);
 app.use('/types', loginRequired, typesRoutes);
-app.use('/assets/:a_id/childassets', loginRequired, assetRoutes);
+app.use('/types/:t_id/assets', loginRequired, typesRoutes);
 app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
 
 app.listen(config.port, function() {
