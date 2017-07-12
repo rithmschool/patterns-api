@@ -7,7 +7,14 @@ const ensureCorrectUser = require('./helpers').ensureCorrectUser;
 router.get('/', function(req, res) {
   db.User.findById(req.params.u_id).populate('activities')
     .then(function(user){
-      db.Activity.find(user.activities).populate('stages')
+      db.Activity.find(user.activities).populate({
+        path: 'stages',
+        model: 'Stage',
+        populate: {
+          path: 'assets',
+          model: 'Asset',
+        }
+      })
       .then(function(activities){
         res.send(activities);
       })
