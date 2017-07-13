@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const typesRoutes = require('./routes/types');
 const assetRoutes = require('./routes/assets');
 const activitiesRoutes = require('./routes/activities');
+const stagesRoutes = require('./routes/stages');
 const loginRequired = require('./routes/helpers').loginRequired;
 
 if (config.useEnv) require("dotenv").config();
@@ -43,6 +44,7 @@ app.use('/auth', authRoutes);
 app.use('/types', loginRequired, typesRoutes);
 app.use('/types/:t_id/assets', loginRequired, assetRoutes);
 app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
+app.use('/stages', loginRequired, stagesRoutes);
 
 app.listen(config.port, function() {
   console.log("Server is listening");
