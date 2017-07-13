@@ -48,23 +48,27 @@ userSchema.post('save', function(user, next) {
         rootAssetType: type.id
       });
     })
-    .then(function(newActivity){
+    .then(function(newActivity) {
       activity = newActivity;
-      return mongoose.model('Stage').create([
-        {
-          name: "Research",
-          activity: activity.id,
-          createdBy: user.id
-        },{
-          name: "Apply",
-          activity: activity.id,
-          createdBy: user.id
-        },{
-          name: "Follow Up",
-          activity: activity.id,
-          createdBy: user.id
-        }
-      ]);
+      return mongoose.model('Stage').create({
+        name: "Research",
+        activity: activity.id,
+        createdBy: user.id
+      });
+    })
+    .then(function() {
+      return mongoose.model('Stage').create({
+        name: 'Apply',
+        activity: activity.id,
+        createdBy: user.id
+      })
+    })
+    .then(function() {
+      return mongoose.model('Stage').create({
+        name: 'Follow Up',
+        activity: activity.id,
+        createdBy: user.id
+      })
     })
     .then(function(){
       user.activities.push(activity); 
