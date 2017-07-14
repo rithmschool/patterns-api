@@ -57,10 +57,10 @@ Used to get and add activities
 ### `routes/assets.js` (loginRequired for all)
 Used to CRUD assets (as children of parent assets)
 
-* `GET all child assets of a given asset (/assets/a_id/childassets)`
-* `POST add new child asset (/assets/a_id/childassets)`
-* `DELETE remove a child (/assets/a_id/childassets/c_id)` - ensureCorrectUser
-* `EDIT a child of an asset (/assets/a_id/childassets/c_id)` - ensureCorrectUser
+* `GET all assets of a type (/types/t_id/assets)`
+* `POST an asset of a given type (/types/t_id/assets)`
+* `DELETE an asset of a given type (/types/t_id/assets/a_id)` - ensureCorrectUser
+* `EDIT an asset of a given type (/types/t_id/assets/a_id` - ensureCorrectUser
 
 ### `routes/types.js` (loginRequired for all)
 Used to CRUD types and top-level assets (i.e., those without parent assets) 
@@ -69,10 +69,6 @@ Used to CRUD types and top-level assets (i.e., those without parent assets)
 * `POST a new type (/types)`
 * `DELETE a type (/types/t_id)` - ensureCorrectUser
 * `EDIT a type (/types/t_id)` - ensureCorrectUser
-* `GET all assets of a type (/types/t_id/assets)`
-* `POST an asset of a given type (/types/t_id/assets)`
-* `DELETE an asset of a given type (/types/t_id/assets/a_id)` - ensureCorrectUser
-* `EDIT an asset of a given type (/types/t_id/assets/a_id` - ensureCorrectUser
 
 ### `routes/stages.js` (loginRequired for all)
 Used to patch stages
