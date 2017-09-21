@@ -6,7 +6,7 @@ const config = {
     mongoUri: 'mongodb://localhost/patterns',
     port: 3001,
     useEnv: true,
-    useMorgan: true,
+    useMorgan: true
   },
   test: {
     mongooseDebug: false,
@@ -22,6 +22,6 @@ const config = {
     useEnv: false,
     useMorgan: false
   }
-}
+};
 
 module.exports = config[env];

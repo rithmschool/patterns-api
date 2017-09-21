@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-findorcreate');
 const stageSchema = new mongoose.Schema({
   name: {
@@ -6,11 +6,11 @@ const stageSchema = new mongoose.Schema({
     required: true
   },
   createdAt: {
-    type: Date, 
+    type: Date,
     default: Date.now
   },
   updatedAt: {
-    type: Date, 
+    type: Date,
     default: Date.now
   },
   activity: {
@@ -18,10 +18,12 @@ const stageSchema = new mongoose.Schema({
     ref: 'Activity',
     required: true
   },
-  assets: [{
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Asset'
-  }],
+  assets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Asset'
+    }
+  ],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -32,17 +34,19 @@ const stageSchema = new mongoose.Schema({
 stageSchema.pre('save', function(next) {
   let stage = this;
   if (stage.isNew) {
-    mongoose.model('Activity').findById(stage.activity)
-    .then(function(activity) {
-      activity.stages.push(stage.id);
-      return activity.save();
-    })
-    .then(function() {
-      next();
-    })
-    .catch(function(error) {
-      next(error);
-    });
+    mongoose
+      .model('Activity')
+      .findById(stage.activity)
+      .then(function(activity) {
+        activity.stages.push(stage.id);
+        return activity.save();
+      })
+      .then(function() {
+        next();
+      })
+      .catch(function(error) {
+        next(error);
+      });
   } else {
     next();
   }

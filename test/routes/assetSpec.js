@@ -1,34 +1,32 @@
-const db = require("../../models");
-const app = require("../../app");
-const login = require("../helpers").login;
+const db = require('../../models');
+const app = require('../../app');
+const login = require('../helpers').login;
 const setup = require('../seed').setup;
 const teardown = require('../seed').teardown;
 const request = require('supertest');
 const expect = require('chai').expect;
 
 describe('Asset routes', function() {
-
   let type = null;
   let user = null;
 
   beforeEach(function(done) {
     setup()
-    .then(function() {
-      return db.User.findOne({ firstName: "Alice" });
-    })
-    .then(function(alice) {
-      user = alice;
-      return db.Type.findOne({ name: "Company" }).populate('assets');
-    })
-    .then(function(company) {
-      type = company;
-      done();
-    })
-    .catch(done);
+      .then(function() {
+        return db.User.findOne({ firstName: 'Alice' });
+      })
+      .then(function(alice) {
+        user = alice;
+        return db.Type.findOne({ name: 'Company' }).populate('assets');
+      })
+      .then(function(company) {
+        type = company;
+        done();
+      })
+      .catch(done);
   });
 
   describe('GET /types/:id/assets', function() {
-
     it('responds with an array of assets if token is valid', function(done) {
       const token = login(user);
       request(app)
@@ -50,16 +48,20 @@ describe('Asset routes', function() {
     it('it should be invalid if there is no token', function(done) {
       request(app)
         .get(`/types/${type.id}/assets`)
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
+        .expect(
+          401,
+          {
+            message: 'You must be logged in to continue.'
+          },
+          done
+        );
     });
-
   });
 
   describe('POST /types/:id/assets', function() {
-
-    it('creates a new asset of the given type if token is valid', function(done) {
+    it('creates a new asset of the given type if token is valid', function(
+      done
+    ) {
       const token = login(user);
       request(app)
         .post(`/types/${type.id}/assets`)
@@ -82,19 +84,21 @@ describe('Asset routes', function() {
     it('it should be invalid if there is no token', function(done) {
       request(app)
         .post(`/types/${type.id}/assets`)
-        .send({random:"data"})
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
+        .send({ random: 'data' })
+        .expect(
+          401,
+          {
+            message: 'You must be logged in to continue.'
+          },
+          done
+        );
     });
-
   });
 
   describe('PATCH /types/:t_id/assets/:a_id', function() {
-
     it('updates an asset of the given type if token is valid', function(done) {
       const token = login(user);
-      const google = type.assets.find(a => a.name === "Google");
+      const google = type.assets.find(a => a.name === 'Google');
       request(app)
         .patch(`/types/${type.id}/assets/${google.id}`)
         .send({
@@ -110,36 +114,42 @@ describe('Asset routes', function() {
     });
 
     it('is invalid if there is no token', function(done) {
-      const google = type.assets.find(a => a.name === "Google");
+      const google = type.assets.find(a => a.name === 'Google');
       request(app)
         .patch(`/types/${type.id}/assets/${google.id}`)
-        .send({ random: "data" })
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
+        .send({ random: 'data' })
+        .expect(
+          401,
+          {
+            message: 'You must be logged in to continue.'
+          },
+          done
+        );
     });
 
     it('ensures that the user is authorized', function(done) {
       const token = login(user);
-      const facebook = type.assets.find(a => a.name === "Facebook");
+      const facebook = type.assets.find(a => a.name === 'Facebook');
       request(app)
         .patch(`/types/${type.id}/assets/${facebook.id}`)
         .send({
-          name: "fail"
+          name: 'fail'
         })
         .set('authorization', 'Bearer: ' + token)
-        .expect(401, {
-          message: "Unauthorized"
-        }, done);
+        .expect(
+          401,
+          {
+            message: 'Unauthorized'
+          },
+          done
+        );
     });
-
   });
 
   describe('DELETE /types/:t_id/assets/:a_id', function() {
-
-    it("deletes an asset if the token is valid", function(done) {
+    it('deletes an asset if the token is valid', function(done) {
       const token = login(user);
-      const google = type.assets.find(a => a.name === "Google");
+      const google = type.assets.find(a => a.name === 'Google');
       request(app)
         .delete(`/types/${type.id}/assets/${google.id}`)
         .set('authorization', 'Bearer: ' + token)
@@ -148,37 +158,44 @@ describe('Asset routes', function() {
           expect(res.body).to.deep.equal({});
         })
         .end(function() {
-          db.Asset.findById(google.id)
-          .then(function(deletedAsset) {
-            expect(deletedAsset).to.be.null;
-            done();
-          })
-          .catch(done);
+          db.Asset
+            .findById(google.id)
+            .then(function(deletedAsset) {
+              expect(deletedAsset).to.be.null;
+              done();
+            })
+            .catch(done);
         });
     });
 
     it('it should be invalid if there is no token', function(done) {
-      const google = type.assets.find(a => a.name === "Google");
+      const google = type.assets.find(a => a.name === 'Google');
       request(app)
         .delete(`/types/${type.id}/assets/${google.id}`)
-        .expect(401, {
-          message: "You must be logged in to continue."
-        }, done);
+        .expect(
+          401,
+          {
+            message: 'You must be logged in to continue.'
+          },
+          done
+        );
     });
 
     it('ensures that the user is authorized', function(done) {
       const token = login(user);
-      const facebook = type.assets.find(a => a.name === "Facebook");
+      const facebook = type.assets.find(a => a.name === 'Facebook');
       request(app)
         .delete(`/types/${type.id}/assets/${facebook.id}`)
         .set('authorization', 'Bearer: ' + token)
-        .expect(401, {
-          message: "Unauthorized"
-        }, done);
+        .expect(
+          401,
+          {
+            message: 'Unauthorized'
+          },
+          done
+        );
     });
-
   });
 
   afterEach(teardown);
-
 });

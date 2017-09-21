@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-function login(user){
+function login(user) {
   const payload = {
     googleId: user.googleId,
     firstName: user.firstName,

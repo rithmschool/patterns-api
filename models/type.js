@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-findorcreate');
 const typeSchema = new mongoose.Schema({
   isAgent: {
@@ -9,10 +9,12 @@ const typeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  assets: [{
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Asset'
-  }],
+  assets: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Asset'
+    }
+  ],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -22,16 +24,20 @@ const typeSchema = new mongoose.Schema({
 
 typeSchema.pre('remove', function(next) {
   let type = this;
-  mongoose.model('Asset').find({typeId: type.id})
-  .then(function(foundAssets){
-    return Promise.all(foundAssets.map(function(asset) {
-      return asset.remove();
-    }));
-  })
-  .then(function() {
-    next();
-  })
-  .catch(next);
+  mongoose
+    .model('Asset')
+    .find({ typeId: type.id })
+    .then(function(foundAssets) {
+      return Promise.all(
+        foundAssets.map(function(asset) {
+          return asset.remove();
+        })
+      );
+    })
+    .then(function() {
+      next();
+    })
+    .catch(next);
 });
 
 typeSchema.plugin(findOrCreate);
