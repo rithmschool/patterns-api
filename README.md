@@ -52,29 +52,29 @@ Used to set up OAuth login using Google
 ### `routes/activites.js` (login required for all)
 Used to get and add activities
 
-* GET all activities `/users/{user_id}/activities` 
-* POST add new activity `/users/{user_id}/activities`
+* GET all activities `/users/{userId}/activities` 
+* POST add new activity `/users/{userId}/activities`
 
 ### `routes/assets.js` (login required for all)
 Used to CRUD assets (as children of parent assets)
 
-* GET all assets of a type `/types/{type_id}/assets`
-* POST an asset of a given type `/types/{type_id}/assets`
-* DELETE an asset of a given type `/types/{type_id}/assets/{asset_id}` - ensureCorrectUser
-* EDIT an asset of a given type `/types/{type_id}/assets/{asset_id}` - ensureCorrectUser
+* GET all assets of a type `/types/{typeId}/assets`
+* POST an asset of a given type `/types/{typeId}/assets`
+* DELETE an asset of a given type `/types/{typeId}/assets/{assetId}` - ensureCorrectUser
+* EDIT an asset of a given type `/types/{typeId}/assets/{assetId}` - ensureCorrectUser
 
 ### `routes/types.js` (login required for all)
 Used to CRUD types and top-level assets (i.e., those without parent assets) 
 
 * GET all types `/types`
 * POST a new type `/types`
-* DELETE a type `/types/{type_id}` - ensureCorrectUser
-* EDIT a type `/types/{type_id}` - ensureCorrectUser
+* DELETE a type `/types/{typeId}` - ensureCorrectUser
+* EDIT a type `/types/{typeId}` - ensureCorrectUser
 
 ### `routes/stages.js` (login required for all)
 Used to patch stages
 
-* PATCH given stage `/stages/{stage_id})`
+* PATCH given stage `/stages/{stageId})`
 
 ## Tests
 
