@@ -1,0 +1,11 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "rules": {
+    "arrow-body-style": [0, "as-needed"],
+    "curly": "error",
+    "no-mixed-spaces-and-tabs": 1,
+    "object-curly-spacing": [1, "always"]
+  }
+}

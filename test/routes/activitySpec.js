@@ -30,7 +30,7 @@ describe('Activity routes', function() {
       .catch(done);
   });
 
-  describe('GET /users/:u_id/activities/', function() {
+  describe('GET /users/:userId/activities/', function() {
     it("responds with all of this user's activities if token is valid", function(
       done
     ) {
@@ -76,7 +76,7 @@ describe('Activity routes', function() {
     });
   });
 
-  describe('POST /users/:u_id/activities', function() {
+  describe('POST /users/:userId/activities', function() {
     it('creates an activity for a user if token is valid', function(done) {
       request(app)
         .post(`/users/${user.id}/activities`)
@@ -86,7 +86,7 @@ describe('Activity routes', function() {
         })
         .set('authorization', 'Bearer: ' + token)
         .expect(200)
-        .expect(function(res, req) {
+        .expect(function(res, request) {
           expect(res.body.name).to.equal("Bob's latest job search");
           expect(res.body.id).to.not.be.null;
           expect(res.body.createdBy).to.equal(user.id);

@@ -24,20 +24,12 @@ const typeSchema = new mongoose.Schema({
 
 typeSchema.pre('remove', function(next) {
   let type = this;
-  mongoose
+  return mongoose
     .model('Asset')
     .find({ typeId: type.id })
-    .then(function(foundAssets) {
-      return Promise.all(
-        foundAssets.map(function(asset) {
-          return asset.remove();
-        })
-      );
-    })
-    .then(function() {
-      next();
-    })
-    .catch(next);
+    .then(foundAssets => Promise.all(foundAssets.map(asset => asset.remove())))
+    .then(() => next())
+    .catch(() => next());
 });
 
 typeSchema.plugin(findOrCreate);

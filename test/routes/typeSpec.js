@@ -110,7 +110,7 @@ describe('Type routes', function() {
     after(teardown);
   });
 
-  describe('PATCH /types/:t_id', function() {
+  describe('PATCH /types/:typeId', function() {
     let type = null;
     let user = null;
     let otherUser = null;
@@ -187,7 +187,7 @@ describe('Type routes', function() {
     after(teardown);
   });
 
-  describe('DELETE /types/:t_id', function() {
+  describe('DELETE /types/:typeId', function() {
     let type = null;
     let user = null;
     let otherUser = null;
@@ -243,7 +243,9 @@ describe('Type routes', function() {
         .set('authorization', 'Bearer: ' + token)
         .expect(200)
         .end(function(err, res) {
-          if (err) return done(err);
+          if (err) {
+            return done(err);
+          }
           expect(res.body).to.deep.equal({});
           db.Asset
             .findById(type.id)

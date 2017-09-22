@@ -14,9 +14,9 @@ router.get(
   })
 );
 
-router.post('/google/callback', function(request, response) {
+router.post('/google/callback', (request, response) => {
   let token = null;
-  axios({
+  return axios({
     method: 'post',
     url: 'https://www.googleapis.com/oauth2/v4/token',
     data: qs.stringify({
@@ -30,22 +30,22 @@ router.post('/google/callback', function(request, response) {
       'content-type': 'application/x-www-form-urlencoded'
     }
   })
-    .then(function(res) {
-      return axios.get(
+    .then(res =>
+      axios.get(
         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${res
           .data.access_token}`
-      );
-    })
-    .then(function(res) {
-      return db.User.findOrCreate({
+      )
+    )
+    .then(res =>
+      db.User.findOrCreate({
         googleId: res.data.id,
         firstName: res.data.given_name,
         lastName: res.data.family_name,
         email: res.data.email,
         picture: res.data.picture
-      });
-    })
-    .then(function(currentUser) {
+      })
+    )
+    .then(currentUser => {
       let user = currentUser.doc;
       const payload = {
         googleId: user.googleId,
@@ -56,14 +56,9 @@ router.post('/google/callback', function(request, response) {
         mongoId: user._id
       };
       token = jwt.sign(payload, process.env.SECRET_KEY);
-      return null;
     })
-    .then(function() {
-      response.status(200).send(token);
-    })
-    .catch(function(error) {
-      response.status(500).send(error);
-    });
+    .then(() => response.status(200).send(token))
+    .catch(error => response.status(500).send(error));
 });
 
 module.exports = router;

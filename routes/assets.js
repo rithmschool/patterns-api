@@ -4,58 +4,44 @@ const jwt = require('jsonwebtoken');
 const db = require('../models');
 const ensureCorrectUser = require('./helpers').ensureCorrectUser;
 
-router.get('/', function(req, res) {
+router.get('/', (request, response) => {
   db.Type
-    .findById(req.params.t_id)
+    .findById(request.params.typeId)
     .populate('assets')
-    .then(function(type) {
-      res.send(type);
-    })
-    .catch(function(err) {
-      res.status(500).send(err);
-    });
+    .then(type => response.send(type))
+    .catch(err => response.status(500).send(err));
 });
 
-router.post('/', function(req, res) {
-  let newAsset = new db.Asset(req.body);
-  const authHeader = req.headers['authorization'];
+router.post('/', (request, response) => {
+  let newAsset = new db.Asset(request.body);
+  const authHeader = request.headers['authorization'];
   const token = authHeader.split(' ')[1];
   const payload = jwt.decode(token);
-  newAsset.typeId = req.params.t_id;
+  newAsset.typeId = request.params.typeId;
   newAsset.createdBy = payload.mongoId;
   newAsset
     .save()
     .then(function() {
-      res.status(200).send(newAsset);
+      response.status(200).send(newAsset);
     })
     .catch(function(err) {
-      res.status(500).send(err);
+      response.status(500).send(err);
     });
 });
 
-router.patch('/:a_id', ensureCorrectUser, function(req, res) {
+router.patch('/:assetId', ensureCorrectUser, (request, response) => {
   db.Asset
-    .findByIdAndUpdate(req.params.a_id, req.body, { new: true })
-    .then(function(updatedAsset) {
-      res.status(200).send(updatedAsset);
-    })
-    .catch(function(err) {
-      res.status(500).send(err);
-    });
+    .findByIdAndUpdate(request.params.assetId, request.body, { new: true })
+    .then(updatedAsset => response.status(200).send(updatedAsset))
+    .catch(err => response.status(500).send(err));
 });
 
-router.delete('/:a_id', ensureCorrectUser, function(req, res) {
+router.delete('/:assetId', ensureCorrectUser, (request, response) => {
   db.Asset
-    .findById(req.params.a_id)
-    .then(function(foundAsset) {
-      return foundAsset.remove();
-    })
-    .then(function() {
-      res.sendStatus(200);
-    })
-    .catch(function(err) {
-      res.status(500).send(err);
-    });
+    .findById(request.params.assetId)
+    .then(foundAsset => foundAsset.remove())
+    .then(() => response.sendStatus(200))
+    .catch(err => response.status(500).send(err));
 });
 
 module.exports = router;

@@ -46,31 +46,24 @@ assetSchema.plugin(tree, { parentExists: true });
 assetSchema.pre('save', function(next) {
   let asset = this;
   if (asset.isNew) {
-    mongoose
+    return mongoose
       .model('Type')
       .findById(asset.typeId)
-      .then(function(type) {
+      .then(type => {
         type.assets.push(asset.id);
         return type.save();
       })
-      .then(function(type) {
-        return mongoose.model('Asset').findById(asset.parent);
-      })
-      .then(function(parent) {
+      .then(type => mongoose.model('Asset').findById(asset.parent))
+      .then(parent => {
         if (parent) {
           parent.assets.push(asset.id);
           return parent.save();
         }
       })
-      .then(function() {
-        next();
-      })
-      .catch(function(err) {
-        next(err);
-      });
-  } else {
-    next();
+      .then(() => next())
+      .catch(err => next(err));
   }
+  return next();
 });
 
 assetSchema.pre('remove', function(next) {
@@ -84,48 +77,42 @@ assetSchema.pre('remove', function(next) {
         .model('Asset')
         .remove({ _id: { $in: descendants.map(d => d._id) } });
     })
-    .then(function() {
-      return mongoose.model('Asset').findById(asset.parent);
-    })
-    .then(function(foundParent) {
+    .then(() => mongoose.model('Asset').findById(asset.parent))
+    .then(foundParent => {
       if (foundParent) {
         foundParent.assets.pull(asset.id);
         return foundParent.save();
       }
     })
-    .then(function() {
-      let typesToUpdate = descendants
-        .concat(asset)
-        .reduce(function(acc, asset) {
-          acc[asset.typeId] = acc[asset.typeId] || new Set();
-          acc[asset.typeId].add(asset.id);
-          return acc;
-        }, {});
+    .then(() => {
+      let typesToUpdate = descendants.concat(asset).reduce((acc, asset) => {
+        acc[asset.typeId] = acc[asset.typeId] || new Set();
+        acc[asset.typeId].add(asset.id);
+        return acc;
+      }, {});
       return Promise.all(
-        Object.keys(typesToUpdate).map(function(id) {
+        Object.keys(typesToUpdate).map(id => {
           return mongoose.model('Type').findByIdAndUpdate(id, {
             $pullAll: { assets: Array.from(typesToUpdate[id]) }
           });
         })
       );
     })
-    .then(function() {
-      return mongoose
+    .then(() =>
+      mongoose
         .model('Stage')
-        .find({ assets: { $in: descendants.concat(asset).map(d => d._id) } });
-    })
-    .then(function(stages) {
-      return Promise.all(
-        stages.map(function(stage) {
-          return mongoose.model('Stage').findByIdAndUpdate(stage.id, {
+        .find({ assets: { $in: descendants.concat(asset).map(d => d._id) } })
+    )
+    .then(stages =>
+      Promise.all(
+        stages.map(stage =>
+          mongoose.model('Stage').findByIdAndUpdate(stage.id, {
             $pullAll: { assets: descendants.concat(asset).map(d => d._id) }
-          });
-        })
-      );
-    })
-    .then(function() {
-      next();
-    })
+          })
+        )
+      )
+    )
+    .then(() => next())
     .catch(next);
 });
 

@@ -4,9 +4,9 @@ const jwt = require('jsonwebtoken');
 const db = require('../models');
 const ensureCorrectUser = require('./helpers').ensureCorrectUser;
 
-router.get('/', function(req, res) {
+router.get('/', (request, response) => {
   db.Activity
-    .find({ createdBy: req.params.u_id })
+    .find({ createdBy: request.params.userId })
     .populate({
       path: 'stages',
       model: 'Stage',
@@ -15,45 +15,33 @@ router.get('/', function(req, res) {
         model: 'Asset'
       }
     })
-    .then(function(activities) {
-      res.send(activities);
-    })
-    .catch(function(err) {
-      res.status(500).send(err);
-    });
+    .then(activities => response.send(activities))
+    .catch(err => response.status(500).send(err));
 });
 
-router.get('/:a_id', function(req, res) {
+router.get('/:assetId', (request, response) => {
   db.Activity
-    .findById(req.params.a_id)
+    .findById(request.params.assetId)
     .populate({
       path: 'stages',
       populate: {
         path: 'assets'
       }
     })
-    .then(function(activity) {
-      res.send(activity);
-    })
-    .catch(function(err) {
-      res.status(500).send(err);
-    });
+    .then(activity => response.send(activity))
+    .catch(err => response.status(500).send(err));
 });
 
-router.post('/', ensureCorrectUser, function(req, res, next) {
-  let newActivity = new db.Activity(req.body);
-  const authHeader = req.headers['authorization'];
+router.post('/', ensureCorrectUser, (request, response, next) => {
+  let newActivity = new db.Activity(request.body);
+  const authHeader = request.headers['authorization'];
   const token = authHeader.split(' ')[1];
   const payload = jwt.decode(token);
   newActivity.createdBy = payload.mongoId;
   newActivity
     .save()
-    .then(function() {
-      res.send(newActivity);
-    })
-    .catch(function(err) {
-      res.status(500).send(err);
-    });
+    .then(() => response.send(newActivity))
+    .catch(err => response.status(500).send(err));
 });
 
 module.exports = router;

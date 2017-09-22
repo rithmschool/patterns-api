@@ -34,22 +34,17 @@ const activitySchema = new mongoose.Schema({
 activitySchema.pre('save', function(next) {
   let activity = this;
   if (activity.isNew) {
-    mongoose
+    return mongoose
       .model('User')
       .findById(activity.createdBy)
-      .then(function(user) {
+      .then(user => {
         user.activities.push(activity.id);
         return user.save();
       })
-      .then(function() {
-        next();
-      })
-      .catch(function(error) {
-        next(error);
-      });
-  } else {
-    next();
+      .then(() => next())
+      .catch(error => next(error));
   }
+  return next();
 });
 
 activitySchema.plugin(findOrCreate);

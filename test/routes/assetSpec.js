@@ -95,7 +95,7 @@ describe('Asset routes', function() {
     });
   });
 
-  describe('PATCH /types/:t_id/assets/:a_id', function() {
+  describe('PATCH /types/:typeId/assets/:assetId', function() {
     it('updates an asset of the given type if token is valid', function(done) {
       const token = login(user);
       const google = type.assets.find(a => a.name === 'Google');
@@ -146,7 +146,7 @@ describe('Asset routes', function() {
     });
   });
 
-  describe('DELETE /types/:t_id/assets/:a_id', function() {
+  describe('DELETE /types/:typeId/assets/:assetId', function() {
     it('deletes an asset if the token is valid', function(done) {
       const token = login(user);
       const google = type.assets.find(a => a.name === 'Google');
@@ -154,7 +154,7 @@ describe('Asset routes', function() {
         .delete(`/types/${type.id}/assets/${google.id}`)
         .set('authorization', 'Bearer: ' + token)
         .expect(200)
-        .expect(function(res, req) {
+        .expect(function(res, request) {
           expect(res.body).to.deep.equal({});
         })
         .end(function() {

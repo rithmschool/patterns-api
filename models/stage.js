@@ -34,22 +34,17 @@ const stageSchema = new mongoose.Schema({
 stageSchema.pre('save', function(next) {
   let stage = this;
   if (stage.isNew) {
-    mongoose
+    return mongoose
       .model('Activity')
       .findById(stage.activity)
-      .then(function(activity) {
+      .then(activity => {
         activity.stages.push(stage.id);
         return activity.save();
       })
-      .then(function() {
-        next();
-      })
-      .catch(function(error) {
-        next(error);
-      });
-  } else {
-    next();
+      .then(() => next())
+      .catch(error => next(error));
   }
+  return next();
 });
 
 stageSchema.plugin(findOrCreate);

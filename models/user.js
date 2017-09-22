@@ -22,29 +22,28 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre('save', function(next) {
   this.wasNew = this.isNew;
-  next();
+  return next();
 });
 
-userSchema.post('save', function(user, next) {
+userSchema.post('save', (user, next) => {
   let type = null;
   let activity = null;
   let stages = null;
   if (user.wasNew) {
-    mongoose
+    return mongoose
       .model('Type')
       .findOne({ name: 'Company' })
-      .then(function(foundType) {
+      .then(foundType => {
         if (foundType) {
           return foundType;
-        } else {
-          return mongoose.model('Type').create({
-            isAgent: true,
-            name: 'Company',
-            createdBy: user.id
-          });
         }
+        return mongoose.model('Type').create({
+          isAgent: true,
+          name: 'Company',
+          createdBy: user.id
+        });
       })
-      .then(function(foundType) {
+      .then(foundType => {
         type = foundType;
         return mongoose.model('Activity').create({
           name: 'Job Search',
@@ -52,7 +51,7 @@ userSchema.post('save', function(user, next) {
           rootAssetType: type.id
         });
       })
-      .then(function(newActivity) {
+      .then(newActivity => {
         activity = newActivity;
         return mongoose.model('Stage').create({
           name: 'Research',
@@ -60,34 +59,27 @@ userSchema.post('save', function(user, next) {
           createdBy: user.id
         });
       })
-      .then(function() {
-        return mongoose.model('Stage').create({
+      .then(() =>
+        mongoose.model('Stage').create({
           name: 'Apply',
           activity: activity.id,
           createdBy: user.id
-        });
-      })
-      .then(function() {
-        return mongoose.model('Stage').create({
+        })
+      )
+      .then(() =>
+        mongoose.model('Stage').create({
           name: 'Follow Up',
           activity: activity.id,
           createdBy: user.id
-        });
-      })
-      .then(function() {
-        user.activities.push(activity);
-      })
-      .then(function() {
-        next();
-      })
-      .catch(function(error) {
-        next(error);
-      });
-  } else {
-    next();
+        })
+      )
+      .then(() => user.activities.push(activity))
+      .then(() => next())
+      .catch(error => next(error));
   }
+  return next();
 });
 
 userSchema.plugin(findOrCreate);
-var User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 module.exports = User;

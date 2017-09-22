@@ -1,65 +1,62 @@
 const jwt = require('jsonwebtoken');
 const db = require('../models');
 
-function loginRequired(req, res, next) {
-  const authHeader = req.headers['authorization'];
+function loginRequired(request, response, next) {
+  const authHeader = request.headers['authorization'];
   if (authHeader) {
     let token = authHeader.split(' ')[1];
     try {
       jwt.verify(token, process.env.SECRET_KEY);
-      next();
+      return next();
     } catch (e) {
-      res.status(401).send({
+      return response.status(401).send({
         message: 'You must be logged in to continue.'
       });
     }
   } else {
-    res.status(401).send({
+    return response.status(401).send({
       message: 'You must be logged in to continue.'
     });
   }
 }
 
-function ensureCorrectUser(req, res, next) {
-  const authHeader = req.headers['authorization'];
+function ensureCorrectUser(request, response, next) {
+  const authHeader = request.headers['authorization'];
   let param = null;
   if (authHeader) {
     let token = authHeader.split(' ')[1];
     let mappedModel = {
-      a_id: db.Asset,
-      t_id: db.Type
+      assetId: db.Asset,
+      typeId: db.Type
     };
 
-    jwt.verify(token, process.env.SECRET_KEY, function(err, decoded) {
-      if (req.params.u_id) {
-        if (!err && decoded.mongoId === req.params.u_id) {
-          next();
-        } else {
-          res.status(401).send({
-            message: 'Unauthorized'
-          });
+    return jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+      if (request.params.userId) {
+        if (!err && decoded.mongoId === request.params.userId) {
+          return next();
         }
-      } else {
-        if (req.params.a_id) {
-          param = 'a_id';
-        } else if (req.params.t_id) {
-          param = 't_id';
-        }
-        mappedModel[param]
-          .findById(req.params[param])
-          .then(function(foundItem) {
-            if (!err && decoded.mongoId === foundItem.createdBy.toString()) {
-              next();
-            } else {
-              throw 'Error';
-            }
-          })
-          .catch(function() {
-            res.status(401).send({
-              message: 'Unauthorized'
-            });
-          });
+        return response.status(401).send({
+          message: 'Unauthorized'
+        });
       }
+      if (request.params.assetId) {
+        param = 'assetId';
+      } else if (request.params.typeId) {
+        param = 'typeId';
+      }
+      return mappedModel[param]
+        .findById(request.params[param])
+        .then(foundItem => {
+          if (!err && decoded.mongoId === foundItem.createdBy.toString()) {
+            return next();
+          }
+          throw 'Error';
+        })
+        .catch(() =>
+          response.status(401).send({
+            message: 'Unauthorized'
+          })
+        );
     });
   }
 }

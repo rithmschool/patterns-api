@@ -14,7 +14,9 @@ const activitiesRoutes = require('./routes/activities');
 const stagesRoutes = require('./routes/stages');
 const loginRequired = require('./routes/helpers').loginRequired;
 
-if (config.useEnv) require('dotenv').config();
+if (config.useEnv) {
+  require('dotenv').config();
+}
 
 if (config.useMorgan) {
   var morgan = require('morgan');
@@ -37,19 +39,17 @@ passport.use(
       session: false,
       passReqToCallback: true
     },
-    function(req, reqaccessToken, refreshToken, profile, done) {
-      return done(null);
-    }
+    (request, reqaccessToken, refreshToken, profile, done) => done(null)
   )
 );
 
 app.use('/auth', authRoutes);
 app.use('/types', loginRequired, typesRoutes);
-app.use('/types/:t_id/assets', loginRequired, assetRoutes);
-app.use('/users/:u_id/activities', loginRequired, activitiesRoutes);
+app.use('/types/:typeId/assets', loginRequired, assetRoutes);
+app.use('/users/:userId/activities', loginRequired, activitiesRoutes);
 app.use('/stages', loginRequired, stagesRoutes);
 
-app.listen(config.port, function() {
+app.listen(config.port, () => {
   console.log('Server is listening');
 });
 
