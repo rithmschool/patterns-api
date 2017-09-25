@@ -50,7 +50,7 @@ app.use('/users/:userId/activities', loginRequired, activitiesRoutes);
 app.use('/stages', loginRequired, stagesRoutes);
 
 app.listen(config.port, () => {
-  console.log('Server is listening');
+  console.log(`Server is listening on port: ${config.port}`);
 });
 
 module.exports = app;

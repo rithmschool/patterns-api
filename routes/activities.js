@@ -19,9 +19,9 @@ router.get('/', (request, response) => {
     .catch(err => response.status(500).send(err));
 });
 
-router.get('/:assetId', (request, response) => {
+router.get('/:activityId', (request, response) => {
   db.Activity
-    .findById(request.params.assetId)
+    .findById(request.params.activityId)
     .populate({
       path: 'stages',
       populate: {
