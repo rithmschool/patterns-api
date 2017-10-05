@@ -21,12 +21,8 @@ router.post('/', (request, response) => {
   newAsset.createdBy = payload.mongoId;
   newAsset
     .save()
-    .then(function() {
-      response.status(200).send(newAsset);
-    })
-    .catch(function(err) {
-      response.status(500).send(err);
-    });
+    .then(() => response.status(200).send(newAsset))
+    .catch(err => response.status(500).send(err));
 });
 
 router.patch('/:assetId', ensureCorrectUser, (request, response) => {

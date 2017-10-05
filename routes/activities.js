@@ -40,7 +40,7 @@ router.post('/', ensureCorrectUser, (request, response, next) => {
   newActivity.createdBy = payload.mongoId;
   newActivity
     .save()
-    .then(() => response.send(newActivity))
+    .then(savedActivity => response.send(savedActivity))
     .catch(err => response.status(500).send(err));
 });
 
