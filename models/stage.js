@@ -31,7 +31,7 @@ const stageSchema = new mongoose.Schema({
   }
 });
 
-stageSchema.pre('save', function(next) {
+stageSchema.pre('save', (next) => {
   let stage = this;
   if (stage.isNew) {
     return mongoose

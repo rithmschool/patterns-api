@@ -74,7 +74,8 @@ Used to CRUD types and top-level assets (i.e., those without parent assets)
 ### `routes/stages.js` (login required for all)
 Used to patch stages
 
-* PATCH given stage `/stages/{stageId})`
+* POST to create a new stage `/stages`
+* PATCH given stage `/stages/{stageId}`
 
 ## Tests
 
