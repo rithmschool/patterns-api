@@ -1,11 +1,12 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router({ mergeParams: true });
 const db = require('../models');
 
 router.post('', (request, response, next) => {
   const newStage = new db.Stage(request.body);
   const token = request.headers['authorization'].split(' ')[1];
-  const paylod = jwt.decode(token);
+  const payload = jwt.decode(token);
   newStage.createdBy = payload.mongoId;
   newStage
     .save()
