@@ -1,4 +1,5 @@
 {
+  "extends": "eslint:recommended",
   "parserOptions": {
     "ecmaVersion": 2017
   },
@@ -7,5 +8,8 @@
     "curly": "error",
     "no-mixed-spaces-and-tabs": 1,
     "object-curly-spacing": [1, "always"]
+  },
+  "env": {
+    "node": true
   }
 }
