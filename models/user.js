@@ -25,7 +25,7 @@ userSchema.pre('save', function(next) {
   return next();
 });
 
-userSchema.post('save', (user, next) => {
+userSchema.post('save', function(user, next) {
   let type = null;
   let activity = null;
   let stages = null;
