@@ -18,7 +18,12 @@ router.patch('/:stageId', (request, response, next) => {
   db.Stage
     .findByIdAndUpdate(request.params.stageId, request.body, { new: true })
     .populate('assets')
-    .then(stage => response.status(200).send(stage))
+    .then(stage => {
+      db.Activity
+        .findByIdAndUpdate(stage.activity, { $set: { updatedAt: new Date() } })
+        .then(() => response.status(200).send(stage))
+        .catch(error => next(error));
+    })
     .catch(err => response.status(500).send(err));
 });
 

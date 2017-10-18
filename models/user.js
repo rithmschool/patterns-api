@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-findorcreate');
-const userSchema = new mongoose.Schema({
-  googleId: {
-    type: String,
-    required: true
+const userSchema = new mongoose.Schema(
+  {
+    googleId: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    },
+    firstName: String,
+    lastName: String,
+    picture: String,
+    activities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Activity'
+      }
+    ]
   },
-  email: {
-    type: String,
-    required: true
-  },
-  firstName: String,
-  lastName: String,
-  picture: String,
-  activities: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Activity'
-    }
-  ]
-});
+  { timestamps: true }
+);
 
 userSchema.pre('save', function(next) {
   this.wasNew = this.isNew;
