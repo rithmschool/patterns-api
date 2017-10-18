@@ -1,35 +1,30 @@
 const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-findorcreate');
-const activitySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  },
-  stages: [
-    {
+const activitySchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true
+    },
+    stages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Stage'
+      }
+    ],
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Stage'
+      ref: 'User',
+      required: true
+    },
+    rootAssetType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Type',
+      required: true
     }
-  ],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
   },
-  rootAssetType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Type',
-    required: true
-  }
-});
+  { timestamps: true }
+);
 
 activitySchema.pre('save', function(next) {
   let activity = this;

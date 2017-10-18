@@ -1,44 +1,39 @@
 const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-findorcreate');
 const tree = require('mongoose-path-tree-promisify');
-const assetSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  url: String,
-  logo: String,
-  assets: [
-    {
+const assetSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true
+    },
+    url: String,
+    logo: String,
+    assets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Asset',
+        required: true
+      }
+    ],
+    typeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Type',
+      required: true
+    },
+    parent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Asset',
+      index: true
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     }
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  },
-  typeId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Type',
-    required: true
-  },
-  parent: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Asset',
-    index: true
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
-});
+  { timestamps: true }
+);
 
 assetSchema.plugin(findOrCreate);
 assetSchema.plugin(tree, { parentExists: true });

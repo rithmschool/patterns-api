@@ -1,26 +1,29 @@
 const mongoose = require('mongoose');
 const findOrCreate = require('mongoose-findorcreate');
-const typeSchema = new mongoose.Schema({
-  isAgent: {
-    type: Boolean,
-    required: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  assets: [
-    {
+const typeSchema = new mongoose.Schema(
+  {
+    isAgent: {
+      type: Boolean,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    assets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Asset'
+      }
+    ],
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Asset'
+      ref: 'User',
+      required: true
     }
-  ],
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
-});
+  },
+  { timestamps: true }
+);
 
 typeSchema.pre('remove', function(next) {
   let type = this;
