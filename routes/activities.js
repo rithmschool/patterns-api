@@ -32,6 +32,36 @@ router.get('/:activityId', (request, response) => {
     .catch(err => response.status(500).send(err));
 });
 
+router.patch('/:activityId', (request, response) => {
+  db.Activity
+    .findByIdAndUpdate(
+      request.params.activityId,
+      { $set: request.body },
+      { new: true }
+    )
+    .populate({
+      path: 'stages',
+      populate: {
+        path: 'assets'
+      }
+    })
+    .then(activity => response.send(activity))
+    .catch(err => response.status(500).send(err));
+});
+
+// router.patch('/:stageId', (request, response, next) => {
+//   db.Stage
+//     .findByIdAndUpdate(request.params.stageId, request.body, { new: true })
+//     .populate('assets')
+//     .then(stage => {
+//       db.Activity
+//         .findByIdAndUpdate(stage.activity, { $set: { updatedAt: new Date() } })
+//         .then(() => response.status(200).send(stage))
+//         .catch(error => next(error));
+//     })
+//     .catch(err => response.status(500).send(err));
+// });
+
 router.post('/', ensureCorrectUser, (request, response, next) => {
   let newActivity = new db.Activity(request.body);
   const authHeader = request.headers['authorization'];
